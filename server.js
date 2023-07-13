@@ -35,8 +35,9 @@ app.get("/users", authenticateToken, async (req, res) => {
   try {
     const result = await db.pool.query("select * from users");
     res.send(result);
-  } catch (err) {
-    throw err;
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
   }
 });
 
