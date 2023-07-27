@@ -9,6 +9,7 @@ const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
 });
 
+// Create a connection pool
 const connectionSettings = {
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
@@ -17,8 +18,6 @@ const connectionSettings = {
   database: process.env.DB_NAME,
   connectionLimit: 10,
 };
-console.log(connectionSettings);
-// Create a connection pool
 const pool = mariadb.createPool(connectionSettings);
 
 // Проверка подключения
@@ -39,7 +38,7 @@ export default {
 
 export async function initDB() {
   // Проверка таблицы roles
-  const [rolesExists] = await pool.query(`SHOW TABLES LIKE 'roles'`);
+  const rolesExists = await pool.query(`SHOW TABLES LIKE 'roles'`);
   if (!rolesExists.length) {
     await pool.query(`
       CREATE TABLE roles (
@@ -49,7 +48,7 @@ export async function initDB() {
     `);
   }
   // Проверяем, есть ли таблица users
-  const [usersExists] = await pool.query(`SHOW TABLES LIKE 'users'`);
+  const usersExists = await pool.query(`SHOW TABLES LIKE 'users'`);
   if (!usersExists.length) {
     await pool.query(`
       CREATE TABLE users (
@@ -65,7 +64,7 @@ export async function initDB() {
   }
 
   // Таблица для типов техники
-  const [equipment_typesExists] = await pool.query(
+  const equipment_typesExists = await pool.query(
     `SHOW TABLES LIKE 'equipment_types'`
   );
   if (!equipment_typesExists.length) {
@@ -78,7 +77,7 @@ export async function initDB() {
   }
 
   // Таблица для списка техники
-  const [equipmentExists] = await pool.query(`SHOW TABLES LIKE 'equipment'`);
+  const equipmentExists = await pool.query(`SHOW TABLES LIKE 'equipment'`);
   if (!equipmentExists.length) {
     await pool.query(`
       CREATE TABLE equipment (
@@ -94,8 +93,8 @@ export async function initDB() {
       `);
   }
 
-  const [objectsExists] = await pool.query(`SHOW TABLES LIKE 'objects'`);
-  if (objectsExists.length === 0) {
+  const objectsExists = await pool.query(`SHOW TABLES LIKE 'objects'`);
+  if (!objectsExists.length) {
     // Таблица для объектов
     await pool.query(`
       CREATE TABLE objects (
@@ -107,7 +106,7 @@ export async function initDB() {
     `);
   }
 
-  const [travel_logsExists] = await pool.query(
+  const travel_logsExists = await pool.query(
     `SHOW TABLES LIKE 'travel_logs'`
   );
   if (!travel_logsExists.length) {

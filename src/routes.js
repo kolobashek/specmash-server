@@ -1,7 +1,16 @@
 import express from "express";
+import passport from "passport";
 import db from "./db.js";
 
 const router = express.Router();
+
+function authenticateToken(req, res, next) {
+  // проверка токена
+  if (!valid) {
+    return res.status(401).json({ error: "Неавторизованный запрос" });
+  }
+  next();
+}
 
 // Получение всех пользователей
 router.get("/users", async (req, res) => {
@@ -26,7 +35,7 @@ router.post("/users", async (req, res) => {
   }
 });
 // GET
-app.get("/users", authenticateToken, async (req, res) => {
+router.get("/users", authenticateToken, async (req, res) => {
   try {
     const result = await db.pool.query("select * from users");
     res.send(result);
@@ -37,7 +46,7 @@ app.get("/users", authenticateToken, async (req, res) => {
 });
 
 // Добавление пользователя
-app.put("/users", async (req, res) => {
+router.put("/users", async (req, res) => {
   const sql = "INSERT INTO users SET ?";
   try {
     await db.pool.query(sql, [req.body]);
@@ -49,12 +58,12 @@ app.put("/users", async (req, res) => {
 });
 
 // обновление пользователя в БД
-app.put("/users/:id", async (req, res) => {
+router.put("/users/:id", async (req, res) => {
   // обновление пользователя в БД
 });
 
 // Удаление пользователя
-app.delete("/users/:id", async (req, res) => {
+router.delete("/users/:id", async (req, res) => {
   const userId = req.params.id;
   const sql = "DELETE FROM users WHERE id = ?";
   try {
@@ -67,15 +76,15 @@ app.delete("/users/:id", async (req, res) => {
 });
 
 // Роут для активации/деактивации пользователя (поле isactive):
-app.patch("/users/:id/activate", async (req, res) => {
+router.patch("/users/:id/activate", async (req, res) => {
   // изменение isactive
 });
 
-app.post("/register", passport.authenticate("local"), (req, res) => {
+router.post("/register", passport.authenticate("local"), (req, res) => {
   // регистрация и выдача JWT
 });
 
-app.post("/login", passport.authenticate("local"), (req, res) => {
+router.post("/login", passport.authenticate("local"), (req, res) => {
   // выдача токена
 });
 

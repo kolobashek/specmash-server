@@ -5,6 +5,7 @@ import db from "./db.js";
 import router from "./routes.js";
 
 const app = express();
+db.checkDbConnection();
 db.initDB();
 // db.checkDbConnection();
 
@@ -25,13 +26,5 @@ passport.use(
     // ...
   })
 );
-
-function authenticateToken(req, res, next) {
-  // проверка токена
-  if (!valid) {
-    return res.status(401).json({ error: "Неавторизованный запрос" });
-  }
-  next();
-}
 
 export default app;
