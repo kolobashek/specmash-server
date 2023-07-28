@@ -1,24 +1,21 @@
-// Получить всех пользователей
-const getUsers = () => {
-  // код для получения пользователей из БД
-};
+// controllers/users.js
 
-// Получить пользователя по id
-const getUserById = (id) => {
-  // код для получения пользователя по id из БД
-};
+import User from '../models/user.js'
 
-// Создать нового пользователя
-const createUser = (userData) => {
-  // код для создания нового пользователя в БД
-};
+export const register = async (req, res) => {
+  const { name, password, phone } = req.body
 
-// Обновить данные пользователя
-const updateUser = (id, userData) => {
-  // код для обновления данных пользователя в БД
-};
+  const user = await User.create(name, password, phone)
 
-// Удалить пользователя
-const deleteUser = (id) => {
-  // код для удаления пользователя из БД
-};
+  res.json(user)
+}
+
+export const login = async (req, res) => {
+  // логика аутентификации
+}
+
+export const getProfile = async (req, res) => {
+  const user = await User.findById(req.user.id)
+
+  res.json(user)
+}

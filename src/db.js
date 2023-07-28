@@ -1,13 +1,18 @@
 // Use the MariaDB Node.js Connector
-import mariadb from "mariadb";
-import winston from "winston";
-import * as dotenv from "dotenv";
+import mariadb from 'mariadb'
+import winston from 'winston'
+import * as dotenv from 'dotenv'
 
-dotenv.config();
+dotenv.config()
 const logger = winston.createLogger({
-  // настройки логгера
-  transports: [new winston.transports.Console()],
-});
+  level: 'info',
+  format: winston.format.json(),
+  defaultMeta: { service: 'user-service' },
+  transports: [
+    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'combined.log' })
+  ]
+})
 
 // Create a connection pool
 const connectionSettings = {
@@ -16,44 +21,49 @@ const connectionSettings = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  connectionLimit: 10,
-};
-const pool = mariadb.createPool(connectionSettings);
+  connectionLimit: 10
+}
+const pool = mariadb.createPool(connectionSettings)
 
 // Проверка подключения
-async function checkDbConnection() {
+async function checkDbConnection () {
   try {
-    await pool.getConnection();
-    console.log("Connected to database");
+    await pool.getConnection()
+    logger.info('Connected to database');
   } catch (err) {
-    console.error("Error connecting to database:", err);
+    logger.error('Error connecting to database:', err);
   }
 }
 
 export default {
   pool,
   checkDbConnection,
-  initDB,
-};
+  initDB
+}
 
-export async function initDB() {
+export async function initDB () {
+  logger.info('Initializing database...');
   // Проверка таблицы roles
-  const rolesExists = await pool.query(`SHOW TABLES LIKE 'roles'`);
+  const rolesExists = await pool.query(`SHOW TABLES LIKE 'roles'`)
   if (!rolesExists.length) {
-    const defaultRoles = [{ name: "admin" }, { name: "user" }];
+    const defaultRoles = [
+      { name: 'admin' },
+      { name: 'manager' },
+      { name: 'driver' }
+    ]
     await pool.query(`
       CREATE TABLE roles (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL  
       )
-    `);
+    `)
     // Добавляем две роли по умолчанию
     for (const role of defaultRoles) {
-      await pool.query("INSERT INTO roles (name) VALUES (?)", [role.name]);
+      await pool.query(`INSERT INTO roles (name) VALUES (?)`, [role.name])
     }
   }
   // Проверяем, есть ли таблица users
-  const usersExists = await pool.query(`SHOW TABLES LIKE 'users'`);
+  const usersExists = await pool.query(`SHOW TABLES LIKE 'users'`)
   if (!usersExists.length) {
     await pool.query(`
       CREATE TABLE users (
@@ -62,27 +72,28 @@ export async function initDB() {
         name VARCHAR(255) NOT NULL,
         password VARCHAR(255) NOT NULL,
         role_id INT NOT NULL,
-        isactive BOOLEAN NOT NULL DEFAULT TRUE,
+        nickname VARCHAR(255),
+        isactive BOOLEAN NOT NULL DEFAULT FALSE,
         FOREIGN KEY (role_id) REFERENCES roles(id)
       )
-    `);
+    `)
   }
 
   // Таблица для типов техники
-  const equipment_typesExists = await pool.query(
+  const equipmentTypesExists = await pool.query(
     `SHOW TABLES LIKE 'equipment_types'`
-  );
-  if (!equipment_typesExists.length) {
+  )
+  if (!equipmentTypesExists.length) {
     await pool.query(`
         CREATE TABLE equipment_types (
           id INT AUTO_INCREMENT PRIMARY KEY,
           name VARCHAR(255) NOT NULL
         )
-      `);
+      `)
   }
 
   // Таблица для списка техники
-  const equipmentExists = await pool.query(`SHOW TABLES LIKE 'equipment'`);
+  const equipmentExists = await pool.query('SHOW TABLES LIKE \'equipment\'')
   if (!equipmentExists.length) {
     await pool.query(`
       CREATE TABLE equipment (
@@ -95,10 +106,10 @@ export async function initDB() {
         nickname VARCHAR(255),
         FOREIGN KEY (type_id) REFERENCES equipment_types(id)
       )
-      `);
+      `)
   }
 
-  const objectsExists = await pool.query(`SHOW TABLES LIKE 'objects'`);
+  const objectsExists = await pool.query(`SHOW TABLES LIKE 'objects'`)
   if (!objectsExists.length) {
     // Таблица для объектов
     await pool.query(`
@@ -108,13 +119,13 @@ export async function initDB() {
         contacts VARCHAR(255),
         address VARCHAR(255)
       )
-    `);
+    `)
   }
 
-  const travel_logsExists = await pool.query(
+  const travelLogsExists = await pool.query(
     `SHOW TABLES LIKE 'travel_logs'`
-  );
-  if (!travel_logsExists.length) {
+  )
+  if (!travelLogsExists.length) {
     // Таблица для путевых листов
     await pool.query(`
       CREATE TABLE travel_logs (
@@ -131,6 +142,7 @@ export async function initDB() {
         FOREIGN KEY (object_id) REFERENCES objects(id),
         FOREIGN KEY (equipment_id) REFERENCES equipment(id)
       )
-    `);
+    `)
   }
+  logger.info('Database initialized successfully');
 }
