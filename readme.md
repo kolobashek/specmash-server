@@ -1,25 +1,25 @@
-```
-# Пример файла .env 
+# Пример файла .env
 
-DB_HOST="127.0.0.1" // Хост БД
-DB_PORT="3306" // Порт БД  
-DB_USER="root" // Пользователь БД
+DB_HOST="127.0.0.1" // Хост БД  
+DB_PORT="3306" // Порт БД
+DB_USER="root" // Пользователь БД  
 DB_PASSWORD="Password123!" // Пароль пользователя БД
 DB_NAME="specmash" // Имя БД
 
-# Команды Docker для создания БД 
+# Команды Docker для запуска БД
 
-docker run --name=mariadb // Создать контейнер mariadb
--e MYSQL_ROOT_PASSWORD=password123 // Передать переменную окружения с паролем 
---env MARIADB_USER=kolobashek // Передать переменную окружения с именем пользователя
---env MARIADB_PASSWORD=password123 // Передать переменную окружения с паролем пользователя 
--e MYSQL_DATABASE=specmash // Передать переменную окружения с именем БД
--p 3306:3306 -d mariadb // Сопоставить порт хоста и контейнера, запустить в фоне
+```
+docker run --name mariadb -e MYSQL_ROOT_PASSWORD=password123 --env MARIADB_USER=kolobashek --env MARIADB_PASSWORD=password123 -e MYSQL_DATABASE=specmash -p 3306:3306 -d mariadb
+```
 
-docker run --name phpmyadmin // Создать контейнер phpmyadmin
--d // Запустить в фоне
---link mariadb:db // Связать с контейнером mariadb по имени db
--p 8080:80 phpmyadmin // Сопоставить порты хоста и контейнера
+Запуск контейнера mariadb с передачей переменных окружения для пользователя, пароля, базы данных и сопоставлением портов.
+
+```
+docker run --name phpmyadmin -d --link mariadb:db -p 8080:80 phpmyadmin
+``` 
+
+Запуск контейнера phpmyadmin, связанного с mariadb, с сопоставлением портов.
+
 
 # Описание структуры БД
 
@@ -76,4 +76,3 @@ docker run --name phpmyadmin // Создать контейнер phpmyadmin
 - hours_worked - отработанные часы
 - hours_idle - часы простоя  
 - comments - комментарии
-```
