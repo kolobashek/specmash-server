@@ -40,12 +40,17 @@ export async function initDB() {
   // Проверка таблицы roles
   const rolesExists = await pool.query(`SHOW TABLES LIKE 'roles'`);
   if (!rolesExists.length) {
+    const defaultRoles = [{ name: "admin" }, { name: "user" }];
     await pool.query(`
       CREATE TABLE roles (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL  
       )
     `);
+    // Добавляем две роли по умолчанию
+    for (const role of defaultRoles) {
+      await pool.query("INSERT INTO roles (name) VALUES (?)", [role.name]);
+    }
   }
   // Проверяем, есть ли таблица users
   const usersExists = await pool.query(`SHOW TABLES LIKE 'users'`);
