@@ -1,9 +1,9 @@
 # Пример файла .env
 
 DB_HOST="127.0.0.1" // Хост БД  
-DB_PORT="3306" // Порт БД
+DB_PORT="3306" // Порт БД  
 DB_USER="root" // Пользователь БД  
-DB_PASSWORD="Password123!" // Пароль пользователя БД
+DB_PASSWORD="Password123!" // Пароль пользователя БД  
 DB_NAME="specmash" // Имя БД
 
 # Команды Docker для запуска БД
