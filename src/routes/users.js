@@ -1,22 +1,13 @@
 import express from 'express'
 import passport from 'passport'
-import jwt from 'jsonwebtoken';
-import db from './db.js'
+import db from '../db.js'
+import checkAuth from '../middlewares/auth.js'
+import { register, login, deleteUser } from '../controllers/users.js'
 
-const router = express.Router()
-
-function authenticateToken (req, res, next) {
-  // проверка токена
-  const token = req.header('Authorization').replace('Bearer ', '')
-  const isValid = jwt.verify(token, 'secret')
-  if (!isValid) {
-    return res.status(401).json({ error: 'Invalid token' })
-  }
-  next()
-}
+const Router = express.Router()
 
 // Получение всех пользователей
-router.get('/users', async (req, res) => {
+Router.get('/users', async (req, res) => {
   try {
     const users = await db.getAllUsers()
     res.json(users)
@@ -27,7 +18,7 @@ router.get('/users', async (req, res) => {
 })
 
 // Создание нового пользователя
-router.post('/users', async (req, res) => {
+Router.post('/users', async (req, res) => {
   try {
     const user = req.body
     await db.createUser(user)
@@ -38,7 +29,7 @@ router.post('/users', async (req, res) => {
   }
 })
 // GET
-router.get('/users', authenticateToken, async (req, res) => {
+Router.get('/users', checkAuth, async (req, res) => {
   try {
     const result = await db.pool.query('select * from users')
     res.send(result)
@@ -49,7 +40,7 @@ router.get('/users', authenticateToken, async (req, res) => {
 })
 
 // Добавление пользователя
-router.put('/users', async (req, res) => {
+Router.put('/users', async (req, res) => {
   const sql = 'INSERT INTO users SET ?'
   try {
     await db.pool.query(sql, [req.body])
@@ -61,34 +52,24 @@ router.put('/users', async (req, res) => {
 })
 
 // обновление пользователя в БД
-router.put('/users/:id', async (req, res) => {
+Router.put('/users/:id', async (req, res) => {
   // обновление пользователя в БД
 })
 
 // Удаление пользователя
-router.delete('/users/:id', async (req, res) => {
-  const userId = req.params.id
-  const sql = 'DELETE FROM users WHERE id = ?'
-  try {
-    await db.pool.query(sql, [userId])
-    res.sendStatus(200)
-  } catch (error) {
-    console.error(error)
-    res.sendStatus(500)
-  }
+Router.delete('/users/:id', async (req, res) => {
+  await deleteUser(req.params.id)
+  res.sendStatus(200)
 })
 
+// Регистрация пользователя
+Router.post('/register', register)
+
 // Роут для активации/деактивации пользователя (поле isactive):
-router.patch('/users/:id/activate', async (req, res) => {
+Router.patch('/users/:id/activate', checkAuth, async (req, res) => {
   // изменение isactive
 })
 
-router.post('/register', passport.authenticate('local'), (req, res) => {
-  // регистрация и выдача JWT
-})
+Router.post('/login', passport.authenticate('local'), login)
 
-router.post('/login', passport.authenticate('local'), (req, res) => {
-  // выдача токена
-})
-
-export default router
+export default Router

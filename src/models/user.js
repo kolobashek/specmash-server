@@ -3,8 +3,8 @@
 import db from '../db.js'
 import bcrypt from 'bcrypt'
 
-export class User {
-  static async create (name, password, phone, roleId, nickname) {
+export default class User {
+  static async create(name, password, phone, roleId, nickname) {
     // Генерируем salt
     const salt = await bcrypt.genSalt(10)
 
@@ -19,11 +19,11 @@ export class User {
     return result.insertId
   }
 
-  static async #verifyPassword (user, password) {
+  static async #verifyPassword(user, password) {
     return await bcrypt.compare(password, user.password)
   }
 
-  static async loginByPhone (phone, password) {
+  static async loginByPhone(phone, password) {
     const user = await this.findByPhone(phone)
     if (!user) {
       throw new Error('Пользователь не найден')
@@ -37,21 +37,21 @@ export class User {
     return user
   }
 
-  static async findById (id) {
+  static async findById(id) {
     const [result] = await db.pool.query('SELECT * FROM users WHERE id = ?', [
-      id
+      id,
     ])
     return result[0]
   }
 
-  static async findByName (name) {
+  static async findByName(name) {
     const [result] = await db.pool.query('SELECT * FROM users WHERE name = ?', [
-      name
+      name,
     ])
     return result[0]
   }
 
-  static async findByPhone (phone) {
+  static async findByPhone(phone) {
     const [result] = await db.pool.query(
       'SELECT * FROM users WHERE phone = ?',
       [phone]
@@ -59,32 +59,32 @@ export class User {
     return result[0]
   }
 
-  static async findActive () {
+  static async findActive() {
     const [result] = await db.pool.query(
       'SELECT * FROM users WHERE isactive = true'
     )
     return result
   }
 
-  static async findByRole (role_id) {
+  static async findByRole(roleId) {
     const [result] = await db.pool.query(
       'SELECT * FROM users WHERE role_id = ?',
-      [role_id]
+      [roleId]
     )
     return result
   }
 
-  static async findAll () {
+  static async findAll() {
     const [result] = await db.pool.query('SELECT * FROM users')
     return result
   }
 
-  static async delete (id) {
+  static async delete(id) {
     const result = await db.pool.query('DELETE FROM users WHERE id = ?', [id])
     return result
   }
 
-  static async update (user) {
+  static async update(user) {
     const result = await db.pool.query(
       'UPDATE users SET name = ?, email = ?, phone = ?, role_id = ?, isactive = ? WHERE id = ?',
       [user.name, user.email, user.phone, user.role_id, user.isactive, user.id]

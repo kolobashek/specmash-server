@@ -1,18 +1,9 @@
 // Use the MariaDB Node.js Connector
 import mariadb from 'mariadb'
-import winston from 'winston'
+import logger from './logger.js'
 import * as dotenv from 'dotenv'
 
 dotenv.config()
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.json(),
-  defaultMeta: { service: 'user-service' },
-  transports: [
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' })
-  ]
-})
 
 // Create a connection pool
 const connectionSettings = {
