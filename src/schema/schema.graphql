@@ -1,0 +1,2 @@
+import Equipment from "./equipments.graphql"
+import User from "./user.graphql"

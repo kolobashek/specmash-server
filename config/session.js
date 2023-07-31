@@ -8,15 +8,15 @@
 // import app from '../src/app.js'
 
 // Настройки сессии
-const sessionConfig = {
-  secret: 'secret key',
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    maxAge: 1000 * 60 * 60 * 24, // 1 day
-  },
-}
-export default sessionConfig
+// const sessionConfig = {
+//   secret: 'secret key',
+//   resave: false,
+//   saveUninitialized: true,
+//   cookie: {
+//     maxAge: 1000 * 60 * 60 * 24, // 1 day
+//   },
+// }
+// export default sessionConfig
 // Инициализируем middleware сессии с настройками
 // app.use(session(sessionConfig))
 

@@ -7,17 +7,19 @@ export const registerUser = async (req, res) => {
   const { name, password, phone, roleId, nickname } = req.body
   // Проверка данных регистрации
   if (!phone || !password || !name) {
-    return res.status(400).json({ error: 'Не указаны телефон, имя или пароль' })
+    return res
+      .status(400)
+      .json({ message: 'Не указаны телефон, имя или пароль' })
   }
   // Проверка существования пользователя
   const user = await User.findByPhone(phone)
   if (user) {
-    return res.status(400).json({ error: 'Пользователь уже существует' })
+    return res.status(400).json({ message: 'Пользователь уже существует' })
   } else {
     await User.create(name, password, phone, roleId, nickname)
     res.status(201).json({
       // userId,
-      success:
+      message:
         'Регистрация прошла успешно! Ожидайте подтверждения администратора.',
     })
   }
