@@ -60,23 +60,14 @@ export default class User {
 
   static async findByPhone(phone) {
     try {
-      console.log('phone query', phone);
       const [result] = await db.pool.query(
-        'SELECT * FROM users WHERE phone = ?', 
-        [phone], (err, result, fields) => {
-          console.log('callback response:', result, err, fields);
-        }
-      );
-      result
-        ? logger.info('User found by phone:', result)
-        : logger.info('No user found by phone');
-      result
-        ? console.log('User found by phone:', result)
-        : console.log('No user found by phone');
-      return result;
+        'SELECT * FROM users WHERE phone = ?',
+        [phone]
+      )
+      return result
     } catch (error) {
-      logger.error('Error finding user by phone:', error);
-      throw error;
+      logger.error('Error finding user by phone:', error)
+      throw error
     }
   }
 
