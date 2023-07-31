@@ -3,32 +3,28 @@
 import User from '../models/user.js'
 import checkAuth from '../middlewares/auth.js'
 
-export const register = async (req, res) => {
+export const registerUser = async (req, res) => {
   const { name, password, phone, roleId, nickname } = req.body
   // Проверка данных регистрации
-  if (!phone || !password) {
+  if (!phone || !password || !name) {
     return res.status(400).json({ error: 'Не указаны телефон, имя или пароль' })
   }
   // Проверка существования пользователя
-  const user = await User.findOne({ phone })
+    console.log('controller - ', phone);
+  const user = await User.findByPhone({ phone })
   if (user) {
     return res.status(400).json({ error: 'Пользователь уже существует' })
+  } else {
+    const userId = await User.create(name, password, phone, roleId, nickname)
+    res.status(201).json({
+      // userId,
+      success:
+        'Регистрация прошла успешно! Ожидайте подтверждения администратора.',
+    })
   }
-
-  // Создание нового пользователя
-  const newUser = new User({ phone, password })
-  await newUser.save()
-
-  const userId = await User.create(name, password, phone, roleId, nickname)
-
-  res.status(201).json({
-    userId,
-    success:
-      'Регистрация прошла успешно! Ожидайте подтверждения администратора.',
-  })
 }
 
-export const login = async (req, res) => {
+export const loginUser = async (req, res) => {
   const { phone, password } = req.body
 
   try {

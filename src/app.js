@@ -1,35 +1,55 @@
 import express from 'express'
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
+import session from 'express-session'
+import sessionConfig from '../config/session.js'
 import db from './db.js'
-import Router from './routes/users.js'
-import checkAuth from './middlewares/auth.js'
+import Router from './routes/auth.js'
+import logger from '../config/logger.js'
+// import checkAuth from './middlewares/auth.js'
 
 // Добавим body parser
 import bodyParser from 'body-parser'
 
 const app = express()
-db.checkDbConnection()
+// db.checkDbConnection()
 db.initDB()
 // db.checkDbConnection();
 
-app.use(Router)
-app.use(checkAuth)
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: false }))
-
 app.use(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:19006')
+  res.header('Access-Control-Allow-Origin', '*');
   res.header(
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Accept'
-  )
-  next()
-})
+  );
+  next();
+});
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(Router)
+// app.use(checkAuth)
+
+app.use((req, res, next) => {
+  logger.info(req.method, req.url);
+  next();
+});
+app.use((err, req, res, next) => {
+  logger.error(err);
+  next(err);
+});
+app.use((req, res, next) => {
+  const oldSend = res.send;
+  res.send = function (data) {
+    logger.info(res.statusCode);
+    oldSend.call(res, data);
+  };
+  next();
+});
 
 // Инициализируем passport
-app.use(passport.initialize())
-app.use(passport.session())
+// app.use(passport.initialize())
+// app.use(passport.session())
+// app.use(session(sessionConfig));
 // app.use(
 //   session({
 //     secret: 'secret',
@@ -37,33 +57,15 @@ app.use(passport.session())
 //     saveUninitialized: true,
 //   })
 // )
-// Определим стратегию LocalStrategy
-passport.use(
-  new LocalStrategy(function (username, password, done) {
-    // Проверка логина и пароля
-    // User.findOne({ username }, function (err, user) {
-    //   if (err) {
-    //     return done(err)
-    //   }
-    //   if (!user) {
-    //     return done(null, false)
-    //   }
-    //   if (!user.verifyPassword(password)) {
-    //     return done(null, false)
-    //   }
-    //   return done(null, user)
-    // })
-  })
-)
 
-app.use(function (err, req, res, next) {
-  if (err.name === 'AuthenticationError') {
-    return res.status(401).json({
-      message: err.message,
-    })
-  }
+// app.use(function (err, req, res, next) {
+//   if (err.name === 'AuthenticationError') {
+//     return res.status(401).json({
+//       message: err.message,
+//     })
+//   }
 
-  return next(err)
-})
+//   return next(err)
+// })
 
 export default app

@@ -2,7 +2,7 @@ import express from 'express'
 import passport from 'passport'
 import db from '../db.js'
 import checkAuth from '../middlewares/auth.js'
-import { register, login, deleteUser } from '../controllers/users.js'
+import { registerUser, login, deleteUser } from '../controllers/users.js'
 
 const Router = express.Router()
 
@@ -63,7 +63,7 @@ Router.delete('/users/:id', async (req, res) => {
 })
 
 // Регистрация пользователя
-Router.post('/register', register)
+// Router.post('/register', registerUser);
 
 // Роут для активации/деактивации пользователя (поле isactive):
 Router.patch('/users/:id/activate', checkAuth, async (req, res) => {

@@ -1,6 +1,6 @@
 // Use the MariaDB Node.js Connector
 import mariadb from 'mariadb'
-import logger from './logger.js'
+import logger from '../config/logger.js'
 import * as dotenv from 'dotenv'
 
 dotenv.config()

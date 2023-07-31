@@ -1,22 +1,29 @@
 // src/models/user.js
 
+import logger from '../../config/logger.js'
 import db from '../db.js'
 import bcrypt from 'bcrypt'
 
 export default class User {
+  constructor(name, password, phone, roleId) {
+    this.name = name
+    this.password = password
+    this.phone = phone
+    this.roleId = 3
+  }
+
   static async create(name, password, phone, roleId, nickname) {
     // Генерируем salt
     const salt = await bcrypt.genSalt(10)
 
     // Шифруем пароль
     const hash = await bcrypt.hash(password, salt)
-
-    const [result] = await db.pool.query(
+    const verifiedRole = roleId || 3
+    const result = await db.pool.query(
       'INSERT INTO users (name, password, phone, role_id, nickname) VALUES (?, ?, ?, ?, ?)',
-      [name, hash, phone, roleId, nickname]
-    )
-
-    return result.insertId
+      [name, hash, phone, verifiedRole, nickname]
+    );
+    return result
   }
 
   static async #verifyPassword(user, password) {
@@ -52,11 +59,25 @@ export default class User {
   }
 
   static async findByPhone(phone) {
-    const [result] = await db.pool.query(
-      'SELECT * FROM users WHERE phone = ?',
-      [phone]
-    )
-    return result[0]
+    try {
+      console.log('phone query', phone);
+      const [result] = await db.pool.query(
+        'SELECT * FROM users WHERE phone = ?', 
+        [phone], (err, result, fields) => {
+          console.log('callback response:', result, err, fields);
+        }
+      );
+      result
+        ? logger.info('User found by phone:', result)
+        : logger.info('No user found by phone');
+      result
+        ? console.log('User found by phone:', result)
+        : console.log('No user found by phone');
+      return result;
+    } catch (error) {
+      logger.error('Error finding user by phone:', error);
+      throw error;
+    }
   }
 
   static async findActive() {

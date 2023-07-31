@@ -4,8 +4,8 @@
 
 // :code:
 // Импортируем модуль express-session
-import session from 'express-session'
-import app from '../src/app.js'
+// import session from 'express-session'
+// import app from '../src/app.js'
 
 // Настройки сессии
 const sessionConfig = {
@@ -16,9 +16,9 @@ const sessionConfig = {
     maxAge: 1000 * 60 * 60 * 24, // 1 day
   },
 }
-
+export default sessionConfig
 // Инициализируем middleware сессии с настройками
-app.use(session(sessionConfig))
+// app.use(session(sessionConfig))
 
 // :commentary:
 // Также можно добавить настройки для хранения сессий в БД, Redis или другом хранилище вместо cookie.

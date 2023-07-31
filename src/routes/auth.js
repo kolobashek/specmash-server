@@ -1,7 +1,7 @@
 // Импорты
 import express from 'express'
 import passport from 'passport'
-import { registerUser, loginUser } from '../controllers/auth.js'
+import { registerUser, loginUser } from '../controllers/users.js'
 
 const router = express.Router()
 
