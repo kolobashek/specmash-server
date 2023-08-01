@@ -14,7 +14,7 @@
     "allowImportingTsExtensions": true
   },
 
-  "include": ["src/**/*", "@types/resolvers.d.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
 
   "ts-node": {
