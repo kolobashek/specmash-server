@@ -1,4 +1,4 @@
-import db from './db'
+import User from './models/user'
 
 const resolvers = {
   Query: {
@@ -6,6 +6,8 @@ const resolvers = {
       // получить пользователей из БД
       // const users = await db.query('SELECT * FROM users')
       // return users
+      const users = await User.query();
+      console.log(users)
     },
 
     roles: async () => {

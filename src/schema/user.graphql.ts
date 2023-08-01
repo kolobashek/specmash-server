@@ -7,6 +7,7 @@ const typeDefs = `#graphql
   type User {
     id: ID!
     name: String!
+    password: String!
     phone: String!
     role: Role!
   }
@@ -35,13 +36,13 @@ const typeDefs = `#graphql
 
   type TravelLog {
     id: ID!
-    driver: User!
-    object: Object!
-    equipment: Equipment! 
+    driver: User
+    object: Object
+    equipment: Equipment
   }
 
   type Query {
-    users: [User!]!
+    users: [User!]
     user(id: ID!): User
     userIsActive(id: ID!): Boolean
     findByPhone(phone: String!): User
