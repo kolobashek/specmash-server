@@ -1,5 +1,5 @@
-import db from '../db'
+// import db from '../db'
 
-export async function getAllUsers() {
-  return await db.from('users').select('*');
-}
+// export async function getAllUsers() {
+//   return await db.from('users').select('*');
+// }

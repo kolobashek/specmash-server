@@ -1,3 +1,4 @@
+import Role from './models/role';
 import User from './models/user'
 
 const resolvers = {
@@ -12,6 +13,8 @@ const resolvers = {
 
     roles: async () => {
       // получить роли из БД
+      const roles = await Role.query();
+      console.log(roles);
     },
 
     equipment: async () => {
