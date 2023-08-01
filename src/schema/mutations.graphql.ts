@@ -1,11 +1,14 @@
-import { makeExecutableSchema } from '@graphql-tools/schema'
-
 const typeDefs = `#graphql
+  type Mutation {
+    createUser(input: CreateUserInput!): User
+  }
+
+  input CreateUserInput {
+    name: String!
+    phone: String!
+    password: String!
+    roleId: Int
+  }
 
 `
-const schema = makeExecutableSchema({
-  typeDefs,
-  resolvers:{},
-})
-
-export default schema
+export default typeDefs

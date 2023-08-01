@@ -4,6 +4,8 @@ const typeDefs = `#graphql
     user(id: ID!): User
     userIsActive(id: ID!): Boolean
     findByPhone(phone: String!): User
+    createUser(data: CreateUserInput!): User!
+  
   
     roles: [Role!]
 
