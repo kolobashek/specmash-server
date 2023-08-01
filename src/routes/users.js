@@ -1,8 +1,8 @@
 import express from 'express'
 import passport from 'passport'
-import db from '../db.js'
-import checkAuth from '../middlewares/auth.js'
-import { registerUser, login, deleteUser } from '../controllers/users.js'
+import db from '../db.ts'
+import checkAuth from '../middlewares/auth.ts'
+import { registerUser, login, deleteUser } from '../controllers/users.ts'
 
 const Router = express.Router()
 

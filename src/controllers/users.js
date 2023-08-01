@@ -1,7 +1,7 @@
 // controllers/users.js
 
-import User from '../models/user.js'
-import checkAuth from '../middlewares/auth.js'
+import User from '../models/user.ts'
+import checkAuth from '../middlewares/auth.ts'
 
 export const registerUser = async (req, res) => {
   const { name, password, phone, roleId, nickname } = req.body

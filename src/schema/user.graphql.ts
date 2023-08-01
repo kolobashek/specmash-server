@@ -1,7 +1,7 @@
 // user.graphql.js
 
-import { makeExecutableSchema } from 'graphql-tools'
-import resolvers from '../resolvers.js'
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import resolvers from '../resolvers.ts'
 
 const typeDefs = `#graphql
   type User {
@@ -43,9 +43,9 @@ const typeDefs = `#graphql
   type Query {
     users: [User!]!
     user(id: ID!): User
-    isActive(id: ID!): Boolean!
+    userIsActive(id: ID!): Boolean
+    findByPhone(phone: String!): User
   
-
     roles: [Role!]!
 
     equipment: [Equipment!]!

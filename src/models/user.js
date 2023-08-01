@@ -1,7 +1,7 @@
 // src/models/user.js
 
-import logger from '../../config/logger.js'
-import db from '../db.js'
+import logger from '../../config/logger.ts'
+import db from '../db.ts'
 import bcrypt from 'bcrypt'
 
 export default class User {

@@ -5,7 +5,7 @@
 // :code:
 // Импортируем модуль express-session
 // import session from 'express-session'
-// import app from '../src/app.js'
+// import app from '../src/app.ts'
 
 // Настройки сессии
 // const sessionConfig = {

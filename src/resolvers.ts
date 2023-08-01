@@ -1,11 +1,11 @@
-import * as db from './db.js'
+import db from './db'
 
 const resolvers = {
   Query: {
     users: async () => {
       // получить пользователей из БД
-      const users = await db.db.query('SELECT * FROM users')
-      return users
+      // const users = await db.query('SELECT * FROM users')
+      // return users
     },
 
     roles: async () => {
