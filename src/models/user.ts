@@ -45,7 +45,9 @@ class User extends Model implements User {
       userData.isActive = false
       const isUserExists = await this.findByPhone(phone)
       if (isUserExists) {
-        return Promise.reject(new Error('Пользователь с таким номером уже есть'))
+        return Promise.reject(
+          new Error('Пользователь с таким номером уже есть')
+        )
       }
       const hashedPassword = await hash(password, 10)
       const newUser = await this.query().insert({
@@ -85,8 +87,43 @@ class User extends Model implements User {
   }
 
   static async isActive(userId: Number): Promise<boolean> {
-    const { isActive } = await knex.select('isActive').from('users').where('id', userId).first()
+    const { isActive } = await knex
+      .select('isActive')
+      .from('users')
+      .where('id', userId)
+      .first()
     return isActive
+  }
+
+  static async getUserByPhone(
+    phone: string,
+    password: string
+  ): Promise<User | Error> {
+    try {
+      const user = await User.query().where({ phone }).first()
+      if (!user) {
+        return new Error('Пользователь не найден')
+      }
+      const isValid = await compare(password, user.password)
+      if (!isValid) {
+        return new Error('Неверный пароль')
+      }
+      return user
+    } catch (error: any) {
+      return error
+    }
+  }
+
+  static async getUserById(id: Number) {
+    try {
+      const user = await User.query().where({ id }).first()
+      if (!user) {
+        return new Error('Пользователь не найден')
+      }
+      return user
+    } catch (error: any) {
+      return new Error(error)
+    }
   }
 
   static async findByPhone(phone: string) {
@@ -104,7 +141,9 @@ class User extends Model implements User {
   static async activateUser(id: Number) {
     const isActive = await this.isActive(id)
     // console.log(`[model]: - ${isActive},${id}`)
-    const result = await knex('users').where('id', id).update({ isActive: !isActive })
+    const result = await knex('users')
+      .where('id', id)
+      .update({ isActive: !isActive })
     return { isActive: !isActive }
   }
 

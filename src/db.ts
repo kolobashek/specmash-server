@@ -60,7 +60,7 @@ export async function initDB() {
                 await knex('users').insert([
                   {
                     phone: '123',
-                    name: 'Admin',
+                    name: 'admin',
                     password:
                       '$2b$10$oeG6fHl5I/oPnnTBEYPKEuEKp/Cr3MUlTRIIqLsf4Dbg3p6ZS.8iW', // 123
                     roleId: 1,

@@ -2,6 +2,7 @@ const typeDefs = `#graphql
   type Query {
     users: [User!]
     user(id: ID!): User
+    me: User
     isActive(userId: ID!): Boolean
     findByPhone(phone: String!): User
     

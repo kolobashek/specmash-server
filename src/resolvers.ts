@@ -1,7 +1,10 @@
 import logger from './config/logger';
 import Role from './models/role';
 import User from './models/user'
+import jwt from 'jsonwebtoken'
 import { GraphQLError } from 'graphql'
+
+const signingKey = process.env.JWT_SECRET || 'secret'
 
 const resolvers = {
   Query: {
@@ -33,17 +36,28 @@ const resolvers = {
       const user = await User.query().where({ phone }).first()
       return user
     },
-    isActive: async (root: any, { userId }: { userId: Number }, context:any): Promise<boolean> => {
+    isActive: async (
+      root: any,
+      { userId }: { userId: Number },
+      context: any
+    ): Promise<boolean> => {
       // Получаем пользователя по id
       const result = await User.isActive(userId)
       logger.debug(JSON.stringify(result))
       // Возвращаем флаг активности
       return result
     },
+    me: (parent: any, args: any, ctx: any) => {
+      // The content of the JWT can be found in the context
+      if (!ctx.jwt) {
+        // No JWT token provided, we are not authenticated
+        return null
+      }
+      return User.getUserById(ctx.jwt.sub)
+    },
   },
   Mutation: {
-
-    register: async (_: any, {input}:{input:CreateUserInput}) => {
+    register: async (_: any, { input }: { input: CreateUserInput }) => {
       try {
         const user = await User.create(input)
         return user
@@ -60,6 +74,27 @@ const resolvers = {
       } catch (error: any) {
         return new GraphQLError(error.message)
       }
+    },
+    login: async (parent: any, { phone, password }: any, ctx: any) => {
+      const user = await User.getUserByPhone(phone, password)
+      if (user instanceof Error) {
+        throw new GraphQLError('Invalid credentials')
+      }
+
+      const token = (jwt as any).sign({ username: user.name }, signingKey, {
+        subject: user.id,
+      })
+
+      // Set the cookie on the response
+      ctx.request.cookieStore?.set({
+        name: 'authorization',
+        sameSite: 'strict',
+        secure: true,
+        domain: 'graphql-yoga.com',
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 24 hours
+        value: token,
+        httpOnly: true,
+      })
     },
   },
 }
