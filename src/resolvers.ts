@@ -1,7 +1,7 @@
 import logger from './config/logger';
 import Role from './models/role';
 import User from './models/user'
-import {hash} from 'bcrypt'
+import { GraphQLError } from 'graphql'
 
 const resolvers = {
   Query: {
@@ -33,7 +33,7 @@ const resolvers = {
       const user = await User.query().where({ phone }).first()
       return user
     },
-    isActive: async (_: any, { userId }: { userId: Number }): Promise<boolean> => {
+    isActive: async (root: any, { userId }: { userId: Number }, context:any): Promise<boolean> => {
       // Получаем пользователя по id
       const result = await User.isActive(userId)
       logger.debug(JSON.stringify(result))
@@ -42,25 +42,24 @@ const resolvers = {
     },
   },
   Mutation: {
-    createUser: async (_: any, { data }: { data: CreateUserInput }) => {
-      // хэширование пароля
-      const hashedPassword = await hash(data.password, 10)
 
-      // Добавление роли по умолчанию
-      data.roleId = 3
-
-      // Регистрация пользователя с хэшированным паролем и ролью по умолчанию
-      const user = await User.query().insert({
-        ...data,
-        password: hashedPassword,
-      })
-      return user
+    register: async (_: any, {input}:{input:CreateUserInput}) => {
+      try {
+        const user = await User.create(input)
+        return user
+      } catch (error: any) {
+        return new GraphQLError(error.message)
+      }
     },
-    activateUser: async (parent: any, {input}: any) => {
-      const {userId} = input
-      // Активация пользователя по id
-      const result = await User.activateUser(userId)
-      return result
+    activateUser: async (parent: any, { input }: UserIdInput) => {
+      try {
+        const { userId } = input
+        // Активация пользователя по id
+        const result = await User.activateUser(userId)
+        return result
+      } catch (error: any) {
+        return new GraphQLError(error.message)
+      }
     },
   },
 }
@@ -73,7 +72,11 @@ type CreateUserInput = {
   phone: string
   roleId?: number
   isActive?: boolean
+  nickname?: string
+  comment?: string
 }
 type UserIdInput = {
-  userId: number
+  input:{
+    userId: number
+  }
 }

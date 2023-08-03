@@ -1,6 +1,6 @@
 const typeDefs = `#graphql
   type Mutation {
-    createUser(input: CreateUserInput!): User
+    register(input: CreateUserInput!): User
     activateUser(input: UserIdInput): IsActivePayload
   }
 `

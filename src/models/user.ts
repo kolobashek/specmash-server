@@ -1,4 +1,5 @@
 import { Model } from 'objection';
+import { hash, compare } from 'bcrypt'
 import { knex } from '../db'
 import Role from './role'
 import logger from '../config/logger';
@@ -9,14 +10,95 @@ interface User {
   nickname: string
   phone: string
   password: string
+  hash: string
   roleId: number
   isActive: boolean
   comment: string
 }
 class User extends Model implements User {
+  constructor(
+    phone?: string,
+    password?: string,
+    id?: number,
+    name?: string,
+    nickname?: string,
+    roleId?: number,
+    isActive?: boolean,
+    comment?: string
+  ) {
+    super()
+    this.id = id || 0
+    this.password = password || ''
+    this.hash = ''
+    this.name = name || ''
+    this.nickname = nickname || ''
+    this.phone = phone || ''
+    this.roleId = roleId || 3
+    this.isActive = isActive || false
+    this.comment = comment || ''
+  }
+  static async create(data: any) {
+    try {
+      const { password, phone, ...userData } = data
+      // Добавление умолчаний
+      userData.roleId = 3
+      userData.isActive = false
+      const isUserExists = await this.findByPhone(phone)
+      if (isUserExists) {
+        return Promise.reject(new Error('Пользователь с таким номером уже есть'))
+      }
+      const hashedPassword = await hash(password, 10)
+      const newUser = await this.query().insert({
+        ...userData,
+        phone,
+        password: hashedPassword,
+      })
+      return newUser
+    } catch (error: any) {
+      logger.error(error)
+      throw new Error(error)
+    }
+  }
+
+  async getHashByPhone() {
+    try {
+      const user = await User.findByPhone(this.phone)
+      if (!user || user instanceof Error) {
+        throw new Error('Пользователь не найден')
+      }
+      this.hash = user.password
+    } catch (error: any) {
+      return new Error(error)
+    }
+  }
+
+  async passwordCompare() {
+    try {
+      const user = await User.query().where({ id: this.id }).first()
+      if (!user) {
+        return new Error('Пользователь не найден')
+      }
+      return await compare(this.password, user.password)
+    } catch (error: any) {
+      return new Error(error)
+    }
+  }
+
   static async isActive(userId: Number): Promise<boolean> {
     const { isActive } = await knex.select('isActive').from('users').where('id', userId).first()
     return isActive
+  }
+
+  static async findByPhone(phone: string) {
+    try {
+      const user = await this.query().where({ phone }).first()
+      if (!user) {
+        return null
+      }
+      return user
+    } catch (error: any) {
+      return new Error(error)
+    }
   }
 
   static async activateUser(id: Number) {

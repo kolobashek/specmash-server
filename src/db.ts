@@ -43,9 +43,10 @@ export async function initDB() {
                 await knex.schema.createTable('users', (table) => {
                     table.increments('id').primary()
                     table.string('phone', 255).notNullable().unique
+                    table.string('password', 255).notNullable()
                     table.string('name', 255).notNullable()
                     table.string('nickname', 255)
-                    table.string('password', 255).notNullable()
+                    table.string('comment', 255)
                     table.boolean('isActive').defaultTo(false).notNullable()
                     table
                       .integer('roleId')

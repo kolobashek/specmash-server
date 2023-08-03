@@ -6,14 +6,9 @@ class Role extends Model {
   }
   static get jsonSchema() {
     return {
-      type: 'object',
-      properties: {
-        gender: {
-          type: 'string',
-          enum: ['Male', 'Female', 'Other'],
-          default: 'Female',
-        },
-      },
+      type: 'string',
+      enum: ['admin', 'manager', 'driver'],
+      default: 'driver',
     }
   }
 }
