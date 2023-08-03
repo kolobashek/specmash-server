@@ -24,7 +24,7 @@ export default {
   },
 
   production: {
-    client: 'postgresql',
+    client: 'mysql',
     connection: {
       database: 'example',
     },
@@ -33,4 +33,4 @@ export default {
       max: 10,
     },
   },
-} as { [key: string]: Knex.Config };
+} as { [key: string]: Knex.Config }

@@ -1,13 +1,12 @@
+import logger from './config/logger';
 import Role from './models/role';
 import User from './models/user'
-import bcrypt from 'bcrypt'
+import {hash} from 'bcrypt'
 
 const resolvers = {
   Query: {
     users: async () => {
       // получить пользователей из БД
-      // const users = await db.query('SELECT * FROM users')
-      // return users
       const users = await User.query()
       return users
     },
@@ -34,21 +33,34 @@ const resolvers = {
       const user = await User.query().where({ phone }).first()
       return user
     },
+    isActive: async (_: any, { userId }: { userId: Number }): Promise<boolean> => {
+      // Получаем пользователя по id
+      const result = await User.isActive(userId)
+      logger.debug(JSON.stringify(result))
+      // Возвращаем флаг активности
+      return result
+    },
+  },
+  Mutation: {
     createUser: async (_: any, { data }: { data: CreateUserInput }) => {
-      // хэширование пароля  
-      console.log(data)
-      const hashedPassword = await bcrypt.hash(data.password, 10);
+      // хэширование пароля
+      const hashedPassword = await hash(data.password, 10)
 
-      // Добавление роли по умолчанию  
-      data.roleId = 3;
+      // Добавление роли по умолчанию
+      data.roleId = 3
 
       // Регистрация пользователя с хэшированным паролем и ролью по умолчанию
       const user = await User.query().insert({
         ...data,
-        password: hashedPassword
-      });
-      console.log(user)
+        password: hashedPassword,
+      })
       return user
+    },
+    activateUser: async (parent: any, {input}: any) => {
+      const {userId} = input
+      // Активация пользователя по id
+      const result = await User.activateUser(userId)
+      return result
     },
   },
 }
@@ -60,4 +72,8 @@ type CreateUserInput = {
   password: string
   phone: string
   roleId?: number
+  isActive?: boolean
+}
+type UserIdInput = {
+  userId: number
 }

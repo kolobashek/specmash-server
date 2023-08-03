@@ -1,14 +1,7 @@
 const typeDefs = `#graphql
   type Mutation {
     createUser(input: CreateUserInput!): User
+    activateUser(input: UserIdInput): IsActivePayload
   }
-
-  input CreateUserInput {
-    name: String!
-    phone: String!
-    password: String!
-    roleId: Int
-  }
-
 `
 export default typeDefs

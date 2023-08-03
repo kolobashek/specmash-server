@@ -2,11 +2,9 @@ const typeDefs = `#graphql
   type Query {
     users: [User!]
     user(id: ID!): User
-    userIsActive(id: ID!): Boolean
+    isActive(userId: ID!): Boolean
     findByPhone(phone: String!): User
-    createUser(data: CreateUserInput!): User!
-  
-  
+    
     roles: [Role!]
 
     equipment: [Equipment!]!

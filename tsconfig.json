@@ -11,7 +11,9 @@
     "moduleResolution": "node",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    // "typeRoots": ["node_modules/@types"],
+    "types": ["node"]
   },
 
   "include": ["src/**/*"],
