@@ -1,4 +1,5 @@
 const typeDefs = `#graphql
+  directive @auth(roles: [String]) on FIELD_DEFINITION
   type User {
     id: ID!
     name: String!

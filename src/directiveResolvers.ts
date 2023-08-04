@@ -1,12 +1,12 @@
-import logger from './config/logger';
-import Role from './models/role';
+import logger from './config/logger'
+import Role from './models/role'
 import User from './models/user'
 import jwt from 'jsonwebtoken'
 import { GraphQLError } from 'graphql'
 
 const signingKey = process.env.JWT_SECRET || 'secret'
 
-const resolvers = {
+const directiveResolvers = {
   Query: {
     users: async () => {
       // получить пользователей из БД
@@ -36,11 +36,7 @@ const resolvers = {
       const user = await User.query().where({ phone }).first()
       return user
     },
-    isActive: async (
-      root: any,
-      { userId }: { userId: Number },
-      context: any
-    ): Promise<boolean> => {
+    isActive: async (root: any, { userId }: { userId: Number }, context: any): Promise<boolean> => {
       // Получаем пользователя по id
       const result = await User.isActive(userId)
       logger.debug(JSON.stringify(result))
@@ -49,8 +45,6 @@ const resolvers = {
     },
     me: (parent: any, args: any, ctx: any) => {
       // The content of the JWT can be found in the context
-      const headers = ctx.request.headers.headersInit.authorization
-      console.log(headers)
       if (!ctx.jwt) {
         // No JWT token provided, we are not authenticated
         return null
@@ -82,11 +76,9 @@ const resolvers = {
       if (user instanceof Error) {
         throw new GraphQLError('Invalid credentials')
       }
-      const {...payload} = user
-      console.log(payload)
-      const token = await(jwt as any).sign(payload, signingKey, {
-        subject: payload.id.toString(),
-        expiresIn: '1d',
+
+      const token = (jwt as any).sign({ username: user.name }, signingKey, {
+        subject: user.id,
       })
 
       // Set the cookie on the response
@@ -103,7 +95,7 @@ const resolvers = {
   },
 }
 
-export default resolvers
+export default directiveResolvers
 
 type CreateUserInput = {
   name: string
@@ -115,7 +107,7 @@ type CreateUserInput = {
   comment?: string
 }
 type UserIdInput = {
-  input:{
+  input: {
     userId: number
   }
 }

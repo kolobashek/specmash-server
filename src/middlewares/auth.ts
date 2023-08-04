@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken'
 
-export default function checkAuth(req, res, next) {
+const signingKey = process.env.JWT_SECRET || 'secret'
+
+export default function AuthMiddleware(req: any, res: any, next: any) {
   // Получаем токен из заголовка Authorization
   const token = req.headers.authorization?.split(' ')[1]
 
@@ -10,14 +12,12 @@ export default function checkAuth(req, res, next) {
 
   try {
     // Верифицируем токен
-    const decoded = jwt.verify(token, 'secret')
+    const decoded = jwt.verify(token, signingKey)
 
     // Добавляем данные пользователя в объект запроса
     req.user = decoded
   } catch (err) {
-    return res
-      .status(401)
-      .json({ message: 'Неверный аутентификационный токен' })
+    return res.status(401).json({ message: 'Неверный аутентификационный токен' })
   }
 
   // Пропускаем запрос дальше
