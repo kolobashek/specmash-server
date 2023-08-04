@@ -4,6 +4,14 @@ class Role extends Model {
   static get tableName() {
     return 'roles'
   }
+  static async getRoleById(id: number) {
+    try {
+      const role = await this.query().findById(id)
+      return role
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
   static get jsonSchema() {
     return {
       type: 'string',

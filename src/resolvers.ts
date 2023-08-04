@@ -1,10 +1,7 @@
 import logger from './config/logger';
 import Role from './models/role';
 import User from './models/user'
-import jwt from 'jsonwebtoken'
 import { GraphQLError } from 'graphql'
-
-const signingKey = process.env.JWT_SECRET || 'secret'
 
 const resolvers = {
   Query: {
@@ -78,17 +75,10 @@ const resolvers = {
       }
     },
     login: async (parent: any, { phone, password }: any, ctx: any) => {
-      const user = await User.getUserByPhone(phone, password)
-      if (user instanceof Error) {
-        throw new GraphQLError('Invalid credentials')
+      const token = await User.login(phone, password)
+      if (token instanceof Error) {
+        return new GraphQLError('Invalid credentials')
       }
-      const {...payload} = user
-      console.log(payload)
-      const token = await(jwt as any).sign(payload, signingKey, {
-        subject: payload.id.toString(),
-        expiresIn: '1d',
-      })
-
       // Set the cookie on the response
       ctx.request.cookieStore?.set({
         name: 'authorization',
@@ -99,6 +89,7 @@ const resolvers = {
         value: token,
         httpOnly: true,
       })
+      return { token }
     },
   },
 }

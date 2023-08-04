@@ -13,6 +13,9 @@ const typeDefs = `#graphql
   type IsActivePayload {
     isActive: Boolean!
   }
+  type LoginPayload {
+    token: String!
+  }
   type Role {
     id: ID!
     name: String!

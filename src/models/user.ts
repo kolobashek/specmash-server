@@ -1,8 +1,11 @@
 import { Model } from 'objection';
 import { hash, compare } from 'bcrypt'
+import jwt from 'jsonwebtoken'
 import { knex } from '../db'
 import Role from './role'
 import logger from '../config/logger';
+
+const signingKey = process.env.JWT_SECRET || 'secret'
 
 interface User {
   id: number
@@ -18,6 +21,7 @@ interface User {
 class User extends Model implements User {
   constructor(
     phone?: string,
+    hash?: string,
     password?: string,
     id?: number,
     name?: string,
@@ -28,8 +32,8 @@ class User extends Model implements User {
   ) {
     super()
     this.id = id || 0
+    this.hash = hash || ''
     this.password = password || ''
-    this.hash = ''
     this.name = name || ''
     this.nickname = nickname || ''
     this.phone = phone || ''
@@ -61,6 +65,20 @@ class User extends Model implements User {
       throw new Error(error)
     }
   }
+  static async login(phone:any, password:any){
+    
+      const user = await User.getUserByPhone(phone, password)
+      if (user instanceof Error) {
+        return user
+      }
+      const { ...payload } = user
+      // console.log(payload)
+      const token = await (jwt as any).sign(payload, signingKey, {
+        subject: payload.id.toString(),
+        expiresIn: '1d',
+      })
+      return token
+  }
 
   async getHashByPhone() {
     try {
@@ -68,7 +86,7 @@ class User extends Model implements User {
       if (!user || user instanceof Error) {
         throw new Error('Пользователь не найден')
       }
-      this.hash = user.password
+      this.hash = user.hash
     } catch (error: any) {
       return new Error(error)
     }
@@ -80,7 +98,7 @@ class User extends Model implements User {
       if (!user) {
         return new Error('Пользователь не найден')
       }
-      return await compare(this.password, user.password)
+      return await compare(this.hash, user.hash)
     } catch (error: any) {
       return new Error(error)
     }
@@ -100,7 +118,7 @@ class User extends Model implements User {
     password: string
   ): Promise<User | Error> {
     try {
-      const user = await User.query().where({ phone }).first()
+      const user = await User.query().withGraphFetched('role').where({ phone }).first()
       if (!user) {
         return new Error('Пользователь не найден')
       }
