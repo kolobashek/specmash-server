@@ -1,5 +1,6 @@
 import logger from './config/logger'
 import Role from './models/role'
+import TravelLog, { CreateTravelLogInput } from './models/travelLog'
 import User from './models/user'
 import { GraphQLError } from 'graphql'
 
@@ -78,10 +79,10 @@ const resolvers = {
 				return new GraphQLError(error.message)
 			}
 		},
-		login: async (parent: any, { phone, password }: any, ctx: any) => {
+		login: async (parent: any, { phone, password }: LoginInput, ctx: any) => {
 			const token = await User.login(phone, password)
 			if (token instanceof Error) {
-				return new GraphQLError('Invalid credentials')
+				return new GraphQLError('Неверный телефон или пароль')
 			}
 			// Set the cookie on the response
 			ctx.request.cookieStore?.set({
@@ -94,6 +95,9 @@ const resolvers = {
 				httpOnly: true,
 			})
 			return { token }
+		},
+		createTravelLog: async (parent: any, { input }: { input: CreateTravelLogInput }) => {
+			const travelLog = TravelLog.create(input)
 		},
 	},
 }
@@ -113,4 +117,8 @@ type UserIdInput = {
 	input: {
 		userId: number
 	}
+}
+interface LoginInput {
+	phone: string
+	password: string
 }

@@ -14,9 +14,8 @@ const typeDefs = `#graphql
     objects: [Object!]!
     object(id: ID!): Object
 
-    travelLogs: [TravelLog!]!
-    travelLog(id: ID!): TravelLog
+    travelLogs(dateStart: String, dateEnd: String, user: [String], equipment: [String], comments: String): [TravelLog]
+    travelLog(id: ID!): TravelLog!
   }
 `
 export default typeDefs
-

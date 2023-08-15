@@ -43,6 +43,11 @@ const typeDefs = `#graphql
     driver: User
     object: Object
     equipment: Equipment
+    date: String
+    shiftNumber: Int
+    hours: Float
+    breaks: Float
+    comment: String
   }
 `
 export default typeDefs
