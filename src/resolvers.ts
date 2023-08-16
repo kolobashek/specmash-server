@@ -1,4 +1,5 @@
 import logger from './config/logger'
+import Equipment from './models/equipment'
 import Role from './models/role'
 import TravelLog, { CreateTravelLogInput } from './models/travelLog'
 import User from './models/user'
@@ -18,10 +19,6 @@ const resolvers = {
 			return roles
 		},
 
-		equipment: async () => {
-			// получить оборудование из БД
-		},
-
 		objects: async () => {
 			// получить объекты из БД
 		},
@@ -34,6 +31,7 @@ const resolvers = {
 			const user = await User.query().where({ phone }).first()
 			return user
 		},
+
 		isActive: async (root: any, { userId }: { userId: Number }, context: any): Promise<boolean> => {
 			// Получаем пользователя по id
 			const result = await User.isActive(userId)
@@ -41,23 +39,29 @@ const resolvers = {
 			// Возвращаем флаг активности
 			return result
 		},
+
 		me: async (parent: any, args: any, ctx: any) => {
 			// The content of the JWT can be found in the context
 			const token: string = ctx.request.headers.headersInit.authorization
-			// console.log(token)
 			if (token) {
 				const user = await User.getUserByHash(token)
 				if (typeof user === 'string') {
-					// console.log(user)
 					return new GraphQLError(user)
 				} else if (!user) {
 					return new GraphQLError('Неверный токен')
 				}
-				// console.log(user)
 				return user
 			}
 			console.log(token)
 			return new GraphQLError('Пользователь не авторизован')
+		},
+		equipments: async () => {
+			try {
+				const equipments = await Equipment.getAll()
+				return equipments
+			} catch (error) {
+				return new GraphQLError(error as string)
+			}
 		},
 	},
 	Mutation: {

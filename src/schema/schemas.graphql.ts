@@ -28,6 +28,10 @@ const typeDefs = `#graphql
     id: ID!
     type: EquipmentType!
     name: String!
+    dimensions: String
+    weight: String
+    licensePlate: String
+    nickname: String	
   }
   type EquipmentType {
     id: ID!

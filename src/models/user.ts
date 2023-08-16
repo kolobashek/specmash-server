@@ -76,17 +76,15 @@ class User extends Model implements User {
 		})
 		return token
 	}
-	static async getUserByHash(hash: string) {
-		if (hash) {
-			const payload = jwt.verify(hash, signingKey)
-			if (typeof payload === 'string') {
-				console.log(payload)
-				return null
-			}
-			const user = await User.getUserById(payload.id)
-			return user
+	static async getUserByHash(token: string) {
+		const hash = token.split(' ')[1]
+		const payload = jwt.verify(hash, signingKey)
+		if (typeof payload === 'string') {
+			console.log(payload)
+			return null
 		}
-		return null
+		const user = await User.getUserById(payload.id)
+		return user
 	}
 	async getHashByPhone() {
 		try {
