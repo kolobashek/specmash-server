@@ -8,6 +8,8 @@ const typeDefs = `#graphql
     
     roles: [Role!]
 
+    equipmentTypes: [EquipmentType]!
+
     equipments: [Equipment]!
     equipmentByType(typeId: ID!): [Equipment!]
 

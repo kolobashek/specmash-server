@@ -1,5 +1,6 @@
 import logger from './config/logger'
 import Equipment from './models/equipment'
+import EquipmentType from './models/equipmentType'
 import Role from './models/role'
 import TravelLog, { CreateTravelLogInput } from './models/travelLog'
 import User from './models/user'
@@ -54,6 +55,17 @@ const resolvers = {
 			}
 			console.log(token)
 			return new GraphQLError('Пользователь не авторизован')
+		},
+		equipmentTypes: async () => {
+			try {
+				const types = await EquipmentType.getAll()
+				if (!types) {
+					return new GraphQLError('База данных не отвечает')
+				}
+				return types
+			} catch (error) {
+				return Promise.reject(error)
+			}
 		},
 		equipments: async () => {
 			try {
