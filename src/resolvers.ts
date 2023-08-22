@@ -1,5 +1,5 @@
 import logger from './config/logger'
-import Equipment from './models/equipment'
+import Equipment, { EquipmentAttributesInput } from './models/equipment'
 import EquipmentType from './models/equipmentType'
 import Role from './models/role'
 import TravelLog, { CreateTravelLogInput } from './models/travelLog'
@@ -56,7 +56,7 @@ const resolvers = {
 			console.log(token)
 			return new GraphQLError('Пользователь не авторизован')
 		},
-		equipmentTypes: async () => {
+		getEquipmentTypes: async () => {
 			try {
 				const types = await EquipmentType.getAll()
 				if (!types) {
@@ -112,8 +112,14 @@ const resolvers = {
 			})
 			return { token }
 		},
-		createTravelLog: async (parent: any, { input }: { input: CreateTravelLogInput }) => {
-			const travelLog = TravelLog.create(input)
+		createTravelLog: async (parent: any, { input }: CreateTravelLogPayload) => {
+			const travelLog = await TravelLog.create(input)
+			return travelLog
+		},
+		createEquipment: async (parent: any, input: EquipmentAttributesInput) => {
+			console.log(input)
+			const newEquipment = await Equipment.create(input)
+			return newEquipment
 		},
 	},
 }
@@ -137,4 +143,10 @@ type UserIdInput = {
 interface LoginInput {
 	phone: string
 	password: string
+}
+interface CreateEquipmentPayload {
+	input: EquipmentAttributesInput
+}
+interface CreateTravelLogPayload {
+	input: CreateTravelLogInput
 }
