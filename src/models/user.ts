@@ -14,7 +14,7 @@ interface User {
 	phone: string
 	password: string
 	hash: string
-	roleId: number
+	role: string
 	isActive: boolean
 	comment: string
 }
@@ -26,7 +26,7 @@ class User extends Model implements User {
 		id?: number,
 		name?: string,
 		nickname?: string,
-		roleId?: number,
+		role?: string,
 		isActive?: boolean,
 		comment?: string
 	) {
@@ -37,7 +37,7 @@ class User extends Model implements User {
 		this.name = name || ''
 		this.nickname = nickname || ''
 		this.phone = phone || ''
-		this.roleId = roleId || 3
+		this.role = role || ''
 		this.isActive = isActive || false
 		this.comment = comment || ''
 	}
@@ -69,19 +69,28 @@ class User extends Model implements User {
 			return user
 		}
 		const { ...payload } = user
-		// console.log(payload)
+		// console.log('payload', payload)
 		const token = await (jwt as any).sign(payload, signingKey, {
 			subject: payload.id.toString(),
 			expiresIn: '1d',
 		})
 		return token
 	}
+	static async getAll() {
+		try {
+			const users = await User.query()
+				.join('roles', 'users.roleId', 'roles.id')
+				.select('users.*', 'roles.name as role')
+			return users
+		} catch (error: any) {
+			return new Error(error)
+		}
+	}
 	static async getUserByHash(token: string) {
 		const hash = token.split(' ')[1]
 		const payload = jwt.verify(hash, signingKey)
 		if (typeof payload === 'string') {
-			console.log(payload)
-			return null
+			return new Error(`${payload}`)
 		}
 		const user = await User.getUserById(payload.id)
 		return user
@@ -97,6 +106,7 @@ class User extends Model implements User {
 			return new Error(error)
 		}
 	}
+	static roleToString = (user: User) => {}
 
 	async passwordCompare() {
 		try {
@@ -117,7 +127,11 @@ class User extends Model implements User {
 
 	static async getUserByPhone(phone: string, password: string): Promise<User | Error> {
 		try {
-			const user = await User.query().withGraphFetched('role').where({ phone }).first()
+			const user = await User.query()
+				.join('roles', 'users.roleId', 'roles.id')
+				.select('users.*', 'roles.name as role')
+				.where({ phone })
+				.first()
 			if (!user) {
 				return new Error('Пользователь не найден')
 			}
@@ -133,7 +147,12 @@ class User extends Model implements User {
 
 	static async getUserById(id: Number) {
 		try {
-			const user = await User.query().withGraphFetched('role').where({ id }).first()
+			const user = await User.query()
+				.join('roles', 'users.roleId', 'roles.id')
+				.select('users.*', 'roles.name as role')
+				.where({ 'users.id': id })
+				.first()
+			// console.log('getUserById', user)
 			if (!user) {
 				return new Error('Пользователь не найден')
 			}
@@ -154,12 +173,18 @@ class User extends Model implements User {
 			return new Error(error)
 		}
 	}
+	public async save(): Promise<User> {
+		return User.query().updateAndFetchById(this.id, this)
+	}
 
-	static async activateUser(id: Number) {
-		const isActive = await this.isActive(id)
-		// console.log(`[model]: - ${isActive},${id}`)
-		const result = await knex('users').where('id', id).update({ isActive: !isActive })
-		return { isActive: !isActive }
+	static async toggleUserActive(userId: number) {
+		const user = await this.query().findById(userId)
+		if (user) {
+			user.isActive = !user.isActive
+			await user.save()
+			return user.isActive
+		}
+		return new Error('Пользователь не найден')
 	}
 
 	static get tableName() {
@@ -180,11 +205,7 @@ class User extends Model implements User {
 				name: { type: 'string', minLength: 1, maxLength: 255 },
 				nickname: { type: 'string', maxLength: 255 },
 				phone: { type: 'string', minLength: 3, maxLength: 25 },
-				role: {
-					type: 'string',
-					enum: ['admin', 'manager', 'driver'],
-					default: 'driver',
-				},
+				role: { type: 'string', minLength: 3, maxLength: 25 },
 				password: { type: 'string', minLength: 1, maxLength: 255 },
 				isActive: { type: 'boolean' },
 				comment: { type: 'string', maxLength: 255 },

@@ -1,5 +1,4 @@
 const typeDefs = `#graphql
-  directive @auth(roles: [String]) on FIELD_DEFINITION
   type User {
     id: ID!
     name: String!
@@ -16,10 +15,12 @@ const typeDefs = `#graphql
   type LoginPayload {
     token: String!
   }
-  type Role {
-    id: ID!
-    name: String!
-  }
+  enum Role {
+    admin
+    manager
+    driver
+    UNKNOWN
+}
   type Auth {
     token: String!
     user: User!

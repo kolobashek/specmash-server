@@ -1,7 +1,7 @@
 const typeDefs = `#graphql
   type Query {
-    users: [User!] @auth(roles: ["admin", "manager"])
-    user(id: ID!): User @auth(roles: ["admin", "manager", "driver"])
+    # users: [User!] @auth(role: admin)
+    # user(id: ID!): User @auth(role: manager)
     me: User
     isActive(userId: ID!): Boolean
     findByPhone(phone: String!): User

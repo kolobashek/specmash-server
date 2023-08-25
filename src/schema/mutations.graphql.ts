@@ -1,7 +1,7 @@
 const typeDefs = `#graphql
   type Mutation {
     register(input: CreateUserInput!): User
-    activateUser(input: UserIdInput!): IsActivePayload
+    toggleUserActive(input: UserIdInput!): Boolean
     login(phone: String!, password: String!): LoginPayload
     createTravelLog(input: CreateTravelLogInput!): TravelLog
     createEquipment(

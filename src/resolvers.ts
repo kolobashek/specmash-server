@@ -6,17 +6,31 @@ import TravelLog, { CreateTravelLogInput } from './models/travelLog'
 import User from './models/user'
 import { GraphQLError } from 'graphql'
 
+const resolverPermissions = async (ctx: any, ...resolvedRoles: string[]) => {
+	const token: string = ctx.request.headers.headersInit.authorization
+	if (!token) return false
+
+	const user = await User.getUserByHash(token)
+
+	if (user instanceof Error) return false
+
+	return resolvedRoles.includes(user.role)
+}
+
 const resolvers = {
 	Query: {
-		users: async () => {
-			// получить пользователей из БД
-			const users = await User.query()
-			return users
+		users: async (parent: any, args: any, ctx: any) => {
+			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
+			if (userHasPermissions) {
+				const users = await User.getAll()
+				return users
+			}
+			return []
 		},
 
 		roles: async () => {
 			// получить роли из БД
-			const roles = await Role.query()
+			const roles = await Role.getAll()
 			return roles
 		},
 
@@ -33,47 +47,36 @@ const resolvers = {
 			return user
 		},
 
-		isActive: async (root: any, { userId }: { userId: Number }, context: any): Promise<boolean> => {
-			// Получаем пользователя по id
-			const result = await User.isActive(userId)
-			logger.debug(JSON.stringify(result))
-			// Возвращаем флаг активности
-			return result
-		},
+		// isActive: async (root: any, { userId }: { userId: Number }, context: any): Promise<boolean> => {
+		// 	// Получаем пользователя по id
+		// 	const result = await User.isActive(userId)
+		// 	logger.debug(JSON.stringify(result))
+		// 	// Возвращаем флаг активности
+		// 	return result
+		// },
 
 		me: async (parent: any, args: any, ctx: any) => {
 			// The content of the JWT can be found in the context
 			const token: string = ctx.request.headers.headersInit.authorization
 			if (token) {
 				const user = await User.getUserByHash(token)
-				if (typeof user === 'string') {
-					return new GraphQLError(user)
+				if (user instanceof Error) {
+					return new GraphQLError(`${user}`)
 				} else if (!user) {
 					return new GraphQLError('Неверный токен')
 				}
 				return user
 			}
-			console.log(token)
+			console.log('token/resolvers', token)
 			return new GraphQLError('Пользователь не авторизован')
 		},
 		getEquipmentTypes: async () => {
-			try {
-				const types = await EquipmentType.getAll()
-				if (!types) {
-					return new GraphQLError('База данных не отвечает')
-				}
-				return types
-			} catch (error) {
-				return Promise.reject(error)
-			}
+			const types = await EquipmentType.getAll()
+			return types
 		},
 		equipments: async () => {
-			try {
-				const equipments = await Equipment.getAll()
-				return equipments
-			} catch (error) {
-				return new GraphQLError(error as string)
-			}
+			const equipments = await Equipment.getAll()
+			return equipments
 		},
 	},
 	Mutation: {
@@ -85,15 +88,15 @@ const resolvers = {
 				return new GraphQLError(error.message)
 			}
 		},
-		activateUser: async (parent: any, { input }: UserIdInput) => {
-			try {
+		toggleUserActive: async (parent: any, { input }: UserIdInput, ctx: any) => {
+			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
+			if (userHasPermissions) {
 				const { userId } = input
 				// Активация пользователя по id
-				const result = await User.activateUser(userId)
+				const result = await User.toggleUserActive(userId)
 				return result
-			} catch (error: any) {
-				return new GraphQLError(error.message)
 			}
+			return new GraphQLError('Недостаточные права доступа')
 		},
 		login: async (parent: any, { phone, password }: LoginInput, ctx: any) => {
 			const token = await User.login(phone, password)
@@ -112,14 +115,22 @@ const resolvers = {
 			})
 			return { token }
 		},
-		createTravelLog: async (parent: any, { input }: CreateTravelLogPayload) => {
-			const travelLog = await TravelLog.create(input)
-			return travelLog
+		createTravelLog: async (parent: any, { input }: CreateTravelLogPayload, ctx: any) => {
+			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
+			if (userHasPermissions) {
+				const travelLog = await TravelLog.create(input)
+				return travelLog
+			}
+			return new GraphQLError('Недостаточные права доступа')
 		},
-		createEquipment: async (parent: any, input: EquipmentAttributesInput) => {
-			console.log(input)
-			const newEquipment = await Equipment.create(input)
-			return newEquipment
+		createEquipment: async (parent: any, input: EquipmentAttributesInput, ctx: any) => {
+			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
+			if (userHasPermissions) {
+				console.log('input', input)
+				const newEquipment = await Equipment.create(input)
+				return newEquipment
+			}
+			return new GraphQLError('Недостаточные права доступа')
 		},
 	},
 }

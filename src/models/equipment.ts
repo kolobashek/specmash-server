@@ -38,16 +38,15 @@ class Equipment extends Model {
 	}
 	static async create(input: EquipmentAttributesInput) {
 		try {
-			console.log(input)
-			const typeId = await EquipmentType.getTypeByName(input.type)
-			if (typeId instanceof Error) {
-				return typeId
+			const type = await EquipmentType.getTypeByName(input.type)
+			if (type instanceof Error) {
+				return type
 			}
-			const { type, ...newPayload } = input
-			const equipment = { typeId: typeId.id, ...newPayload }
-			console.log(equipment)
 
-			const newEquipment = await Equipment.query().insert(equipment)
+			const newEquipment = await Equipment.query().insert({
+				...input,
+				typeId: type.id,
+			})
 
 			return newEquipment
 		} catch (error) {
