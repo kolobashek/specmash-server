@@ -8,7 +8,9 @@ const typeDefs = `#graphql
     name: String!
     phone: String!
     password: String!
-    roleId: Int
+    role: String
+    nickname: String
+    comment: String
   }
 
   input CreateTravelLogInput {

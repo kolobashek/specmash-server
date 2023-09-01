@@ -5,7 +5,7 @@ const typeDefs = `#graphql
     nickname: String
     password: String!
     phone: String!
-    role: Role!
+    role: Role
     isActive: Boolean!
     comment: String
   }
@@ -19,7 +19,6 @@ const typeDefs = `#graphql
     admin
     manager
     driver
-    UNKNOWN
 }
   type Auth {
     token: String!

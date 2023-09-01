@@ -28,6 +28,15 @@ const resolvers = {
 			return []
 		},
 
+		user: async (parent: any, { id }: { id: number }, ctx: any) => {
+			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
+			if (userHasPermissions) {
+				const user = await User.getUserById(id)
+				return user
+			}
+			return new GraphQLError('Не достаточно прав доступа')
+		},
+
 		roles: async () => {
 			// получить роли из БД
 			const roles = await Role.getAll()

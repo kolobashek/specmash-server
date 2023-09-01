@@ -49,6 +49,7 @@ export async function initDB() {
 					table.string('name', 255).notNullable()
 					table.string('nickname', 255)
 					table.string('comment', 255)
+					table.specificType('equipmentTypeIds', 'integer[]')
 					table.boolean('isActive').defaultTo(false).notNullable()
 					table.integer('roleId').notNullable().defaultTo(3).unsigned()
 					table.foreign('roleId').references('roles.id')
@@ -144,6 +145,22 @@ export async function initDB() {
 			console.error('Ошибка при создании таблицы equipment:', error)
 		}
 	}
+	const checkUserEquipmentTypes = async () => {
+		try {
+			const userEquipmentTypesExists = await knex.schema.hasTable('userEquipmentTypes')
+			if (!userEquipmentTypesExists) {
+				await knex.schema.createTable('userEquipmentTypes', (table) => {
+					table.integer('userId').unsigned()
+					table.foreign('userId').references('users.id')
+
+					table.integer('equipmentTypeId').unsigned()
+					table.foreign('equipmentTypeId').references('equipmentTypes.id')
+				})
+			}
+		} catch (error) {
+			console.error(error)
+		}
+	}
 	// Проверяем наличие таблицы objects
 	const checkObjects = async () => {
 		try {
@@ -190,6 +207,7 @@ export async function initDB() {
 	try {
 		await checkRoles()
 		await checkUsers()
+		await checkUserEquipmentTypes()
 		await checkEquipmentTypes()
 		await checkEquipment()
 		await checkObjects()

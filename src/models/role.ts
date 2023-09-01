@@ -1,6 +1,13 @@
 import { Model } from 'objection'
 
 class Role extends Model {
+	constructor(name: string, id: number) {
+		super()
+		this.name = name
+		this.id = id
+	}
+	id
+	name
 	static get tableName() {
 		return 'roles'
 	}
@@ -15,7 +22,7 @@ class Role extends Model {
 	}
 	static getAll = async () => {
 		const allRoles = await this.query().select('name')
-		return allRoles
+		return allRoles.map((role) => role.name)
 	}
 	static get jsonSchema() {
 		return {
