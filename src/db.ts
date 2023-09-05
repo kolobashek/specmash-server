@@ -23,7 +23,7 @@ export async function initDB() {
 					table.string('name', 255).notNullable().unique()
 				})
 			}
-			const roleNames = ['admin', 'manager', 'driver']
+			const roleNames = ['admin', 'manager', 'driver', 'UNDEFINED']
 			for (const roleName of roleNames) {
 				const roleExists = await knex('roles').where({ name: roleName }).first()
 

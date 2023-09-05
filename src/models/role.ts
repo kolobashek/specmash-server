@@ -14,8 +14,18 @@ class Role extends Model {
 	static getRoleById = async (id: number) => {
 		try {
 			const role = await this.query().findById(id)
-			console.log('role', role)
 			return role
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
+	static getByName = async (name: string) => {
+		try {
+			const role = await this.query().select('name').where({ name }).first()
+			if (role) {
+				return role
+			}
+			return new Role('UNDEFINED', 4)
 		} catch (error) {
 			return Promise.reject(error)
 		}
@@ -27,7 +37,7 @@ class Role extends Model {
 	static get jsonSchema() {
 		return {
 			type: 'string',
-			enum: ['admin', 'manager', 'driver'],
+			enum: ['admin', 'manager', 'driver', 'UNDEFINED'],
 			default: 'driver',
 		}
 	}

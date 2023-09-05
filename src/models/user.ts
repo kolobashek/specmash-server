@@ -13,7 +13,7 @@ interface User {
 	nickname: string
 	phone: string
 	password: string
-	hash: string
+	// hash: string
 	role: string
 	isActive: boolean
 	comment: string
@@ -21,7 +21,7 @@ interface User {
 class User extends Model implements User {
 	constructor(
 		phone?: string,
-		hash?: string,
+		// hash?: string,
 		password?: string,
 		id?: number,
 		name?: string,
@@ -31,15 +31,15 @@ class User extends Model implements User {
 		comment?: string
 	) {
 		super()
-		this.id = id || 0
-		this.hash = hash || ''
-		this.password = password || ''
-		this.name = name || ''
-		this.nickname = nickname || ''
-		this.phone = phone || ''
-		this.role = role || ''
-		this.isActive = isActive || false
-		this.comment = comment || ''
+		this.id = id ?? 0
+		// this.hash = hash ?? ''
+		this.password = password ?? ''
+		this.name = name ?? ''
+		this.nickname = nickname ?? ''
+		this.phone = phone ?? ''
+		this.role = role ?? ''
+		this.isActive = isActive ?? false
+		this.comment = comment ?? ''
 	}
 	static async create(data: any) {
 		try {
@@ -63,6 +63,39 @@ class User extends Model implements User {
 			throw new Error(error)
 		}
 	}
+	static async update({
+		id,
+		name,
+		nickname,
+		phone,
+		password,
+		role,
+		isActive,
+		comment,
+	}: UpdateUserInput) {
+		let userData: UserDbInput = {
+			name,
+			nickname,
+			phone,
+			isActive,
+			comment,
+			password,
+			role,
+		}
+
+		if (password) {
+			const hashedPassword = await hash(password, 10)
+			userData.password = hashedPassword
+		}
+		console.log(userData)
+		const rowResult = await this.query().update(userData).where({ id })
+		if (rowResult > 0) {
+			const newUser = await User.getUserById(id)
+			return newUser
+		}
+		return new Error('Пользователь не обновлен')
+	}
+
 	static async login(phone: any, password: any) {
 		const user = await User.getUserByPhone(phone, password)
 		if (user instanceof Error) {
@@ -101,20 +134,20 @@ class User extends Model implements User {
 			if (!user || user instanceof Error) {
 				throw new Error('Пользователь не найден')
 			}
-			this.hash = user.hash
+			// this.hash = user.hash
 		} catch (error: any) {
 			return new Error(error)
 		}
 	}
 	static roleToString = (user: User) => {}
 
-	async passwordCompare() {
+	async passwordCompare(hash: string) {
 		try {
 			const user = await User.query().where({ id: this.id }).first()
 			if (!user) {
 				return new Error('Пользователь не найден')
 			}
-			return await compare(this.hash, user.hash)
+			return await compare(hash, user.password)
 		} catch (error: any) {
 			return new Error(error)
 		}
@@ -198,14 +231,14 @@ class User extends Model implements User {
 	static get jsonSchema() {
 		return {
 			type: 'object',
-			required: ['name', 'phone', 'password', 'role'],
+			required: ['name', 'phone', 'role'],
 
 			properties: {
 				id: { type: 'integer' },
 				name: { type: 'string', minLength: 1, maxLength: 255 },
 				nickname: { type: 'string', maxLength: 255 },
 				phone: { type: 'string', minLength: 3, maxLength: 25 },
-				role: { type: 'string', minLength: 3, maxLength: 25 },
+				role: { type: 'string', minLength: 1, maxLength: 30 },
 				password: { type: 'string', minLength: 1, maxLength: 255 },
 				isActive: { type: 'boolean' },
 				comment: { type: 'string', maxLength: 255 },
@@ -214,9 +247,6 @@ class User extends Model implements User {
 	}
 
 	static get relationMappings() {
-		// const users = await User.query()
-		//   .withGraphFetched('role')
-		//   .where({ isActive: true });
 		return {
 			role: {
 				relation: Model.BelongsToOneRelation,
@@ -230,3 +260,24 @@ class User extends Model implements User {
 	}
 }
 export default User
+
+type UpdateUserInput = {
+	id: number
+	name: string
+	nickname?: string
+	phone: string
+	password?: string
+	role: string
+	isActive?: boolean
+	comment?: string
+}
+
+type UserDbInput = {
+	name: string | undefined
+	nickname: string | undefined
+	phone: string | undefined
+	isActive: boolean | undefined
+	comment: string | undefined
+	password: string | undefined
+	role: string
+}

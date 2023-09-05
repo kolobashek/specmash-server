@@ -19,6 +19,7 @@ const typeDefs = `#graphql
     admin
     manager
     driver
+    UNDEFINED
 }
   type Auth {
     token: String!

@@ -97,6 +97,15 @@ const resolvers = {
 				return new GraphQLError(error.message)
 			}
 		},
+		updateUser: async (parent: any, { input }: { input: UpdateUserInput }, ctx: any) => {
+			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
+			if (userHasPermissions) {
+				const user = await User.update(input)
+				console.log(user)
+				return user
+			}
+			return new GraphQLError('Недостаточно прав')
+		},
 		toggleUserActive: async (parent: any, { input }: UserIdInput, ctx: any) => {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
@@ -105,7 +114,7 @@ const resolvers = {
 				const result = await User.toggleUserActive(userId)
 				return result
 			}
-			return new GraphQLError('Недостаточные права доступа')
+			return new GraphQLError('Недостаточно прав')
 		},
 		login: async (parent: any, { phone, password }: LoginInput, ctx: any) => {
 			const token = await User.login(phone, password)
@@ -159,6 +168,16 @@ type UserIdInput = {
 	input: {
 		userId: number
 	}
+}
+type UpdateUserInput = {
+	id: number
+	name: string
+	password?: string
+	phone: string
+	role: string
+	isActive?: boolean
+	nickname?: string
+	comment?: string
 }
 interface LoginInput {
 	phone: string

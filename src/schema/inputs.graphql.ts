@@ -12,6 +12,16 @@ const typeDefs = `#graphql
     nickname: String
     comment: String
   }
+  input UpdateUserInput {
+    id: Int!
+    name: String!
+    phone: String!
+    password: String
+    role: String
+    nickname: String
+    isActive: Boolean
+    comment: String
+  }
 
   input CreateTravelLogInput {
     driverId: Int
