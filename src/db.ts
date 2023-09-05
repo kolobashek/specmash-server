@@ -161,6 +161,24 @@ export async function initDB() {
 			console.error(error)
 		}
 	}
+	// Проверяем наличие таблицы contrAgents
+	const checkContrAgents = async () => {
+		try {
+			const contrAgentsExists = await knex.schema.hasTable('contrAgents')
+
+			if (!contrAgentsExists) {
+				await knex.schema.createTable('contrAgents', (table) => {
+					table.increments('id').primary()
+					table.string('name', 255).notNullable()
+					table.string('contacts', 255)
+					table.string('address', 255)
+					table.string('comments', 255)
+				})
+			}
+		} catch (error) {
+			console.error(error)
+		}
+	}
 	// Проверяем наличие таблицы objects
 	const checkObjects = async () => {
 		try {
@@ -176,6 +194,20 @@ export async function initDB() {
 			}
 		} catch (error) {
 			console.error(error)
+		}
+	}
+	const checkContrAgentsObjects = async () => {
+		const tableExists = await knex.schema.hasTable('contrAgents_objects')
+
+		if (!tableExists) {
+			await knex.schema.createTable('contrAgents_objects', (table) => {
+				table.increments('id').primary()
+				table.integer('contrAgentId').unsigned()
+				table.integer('objectId').unsigned()
+
+				table.foreign('contrAgentId').references('contrAgents.id')
+				table.foreign('objectId').references('objects.id')
+			})
 		}
 	}
 	// Проверяем наличие таблицы travelLogs
@@ -210,7 +242,9 @@ export async function initDB() {
 		await checkUserEquipmentTypes()
 		await checkEquipmentTypes()
 		await checkEquipment()
+		await checkContrAgents()
 		await checkObjects()
+		await checkContrAgentsObjects()
 		await checkTravelLogs()
 
 		logger.info('Database initialized successfully')
