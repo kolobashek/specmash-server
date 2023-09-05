@@ -197,10 +197,10 @@ export async function initDB() {
 		}
 	}
 	const checkContrAgentsObjects = async () => {
-		const tableExists = await knex.schema.hasTable('contrAgents_objects')
+		const tableExists = await knex.schema.hasTable('contrAgentsObjects')
 
 		if (!tableExists) {
-			await knex.schema.createTable('contrAgents_objects', (table) => {
+			await knex.schema.createTable('contrAgentsObjects', (table) => {
 				table.increments('id').primary()
 				table.integer('contrAgentId').unsigned()
 				table.integer('objectId').unsigned()
