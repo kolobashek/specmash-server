@@ -12,10 +12,13 @@ const typeDefs = `#graphql
     getEquipmentTypes: [EquipmentType]!
 
     equipments: [Equipment]!
-    equipmentByType(typeId: ID!): [Equipment!]
+    equipmentByType(typeId: ID!): [Equipment]!
 
     objects: [Object]!
     object(id: ID!): Object
+
+    contrAgents: [ContrAgent]!
+    contrAgent(id: ID!): ContrAgent
 
     travelLogs(dateStart: String, dateEnd: String, user: [String], equipment: [String], comments: String): [TravelLog]
     travelLog(id: ID!): TravelLog!

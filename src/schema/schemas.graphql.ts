@@ -41,7 +41,17 @@ const typeDefs = `#graphql
   type Object {
     id: ID!
     name: String!
+    contacts: String
     address: String
+    contrAgents: [ContrAgent]
+  }
+  type ContrAgent {
+    id: ID!
+    name: String!
+    contacts: String
+    address: String
+    comments: String
+    objects: [Object]
   }
   type TravelLog {
     id: ID!

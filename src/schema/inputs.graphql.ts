@@ -34,5 +34,20 @@ const typeDefs = `#graphql
     comments: String
   }
 
+  input CreateContrAgentInput {
+    name: String!
+    contacts: String
+    address: String
+    comments: String
+    objects: [Int!]
+  }
+
+  input CreateObjectInput {
+    name: String!
+    contacts: String
+    address: String
+    contrAgents: [Int!]
+  }
+
 `
 export default typeDefs
