@@ -36,6 +36,7 @@ class Object extends Model {
 			// 	.leftJoin('objectTypes', 'object.typeId', 'objectTypes.id')
 			// 	.from('object')
 			// return objects
+			console.log('objects.getAll')
 		} catch (error) {
 			return new Error(error as string)
 		}

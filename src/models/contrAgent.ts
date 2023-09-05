@@ -3,7 +3,7 @@ import Object from './contrAgent'
 
 class ContrAgent extends Model {
 	static get tableName() {
-		return 'contrAgent'
+		return 'contrAgents'
 	}
 	static get relationMappings() {
 		return {
@@ -23,19 +23,8 @@ class ContrAgent extends Model {
 	}
 	static async getAll() {
 		try {
-			// const contrAgent = await ContrAgent.query()
-			// 	.select(
-			// 		`object.id`,
-			// 		'object.name',
-			// 		'dimensions',
-			// 		'weight',
-			// 		'licensePlate',
-			// 		'nickname',
-			// 		'objectTypes.name as type'
-			// 	)
-			// 	.leftJoin('objectTypes', 'object.typeId', 'objectTypes.id')
-			// 	.from('object')
-			// return contrAgent
+			const contrAgents = await ContrAgent.query()
+			return contrAgents
 		} catch (error) {
 			return new Error(error as string)
 		}

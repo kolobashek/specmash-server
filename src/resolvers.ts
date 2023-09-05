@@ -2,9 +2,11 @@ import logger from './config/logger'
 import Equipment, { EquipmentAttributesInput } from './models/equipment'
 import EquipmentType from './models/equipmentType'
 import Role from './models/role'
+import Object from './models/object'
 import TravelLog, { CreateTravelLogInput } from './models/travelLog'
 import User from './models/user'
 import { GraphQLError } from 'graphql'
+import ContrAgent from './models/contrAgent'
 
 const resolverPermissions = async (ctx: any, ...resolvedRoles: string[]) => {
 	const token: string = ctx.request.headers.headersInit.authorization
@@ -45,6 +47,14 @@ const resolvers = {
 
 		objects: async () => {
 			// получить объекты из БД
+			const objects = await Object.getAll()
+			return objects
+		},
+
+		contrAgents: async () => {
+			// получить объекты из БД
+			const contrAgents = await ContrAgent.getAll()
+			return contrAgents
 		},
 
 		travelLogs: async () => {
