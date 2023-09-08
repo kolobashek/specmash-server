@@ -51,6 +51,11 @@ const resolvers = {
 			return objects
 		},
 
+		object: async (parent: any, { id }: { id: number }, ctx: any) => {
+			const object = await Object.getObjectById(id)
+			return object
+		},
+
 		contrAgents: async () => {
 			// получить объекты из БД
 			const contrAgents = await ContrAgent.getAll()

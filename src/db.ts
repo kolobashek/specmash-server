@@ -54,8 +54,8 @@ export async function initDB() {
 					table.integer('roleId').notNullable().defaultTo(3).unsigned()
 					table.foreign('roleId').references('roles.id')
 				})
-				// Добавление пользователей по умолчанию
 			}
+			// Добавление пользователей по умолчанию
 			const users = [
 				{
 					phone: '123',
@@ -97,6 +97,7 @@ export async function initDB() {
 				await knex.schema.createTable('equipmentTypes', (table) => {
 					table.increments('id').primary()
 					table.string('name', 255).notNullable().unique()
+					table.boolean('deleted').defaultTo(false).notNullable()
 				})
 			}
 			const equipmentTypes = [
@@ -138,6 +139,7 @@ export async function initDB() {
 					table.integer('weight')
 					table.string('licensePlate', 255)
 					table.string('nickname', 255)
+					table.boolean('deleted').defaultTo(false).notNullable()
 					table.foreign('typeId').references('equipmentTypes.id')
 				})
 			}
@@ -152,7 +154,6 @@ export async function initDB() {
 				await knex.schema.createTable('userEquipmentTypes', (table) => {
 					table.integer('userId').unsigned()
 					table.foreign('userId').references('users.id')
-
 					table.integer('equipmentTypeId').unsigned()
 					table.foreign('equipmentTypeId').references('equipmentTypes.id')
 				})
@@ -173,6 +174,7 @@ export async function initDB() {
 					table.string('contacts', 255)
 					table.string('address', 255)
 					table.string('comments', 255)
+					table.boolean('deleted').defaultTo(false).notNullable()
 				})
 			}
 		} catch (error) {
@@ -190,6 +192,7 @@ export async function initDB() {
 					table.string('name', 255).notNullable()
 					table.string('contacts', 255)
 					table.string('address', 255)
+					table.boolean('deleted').defaultTo(false).notNullable()
 				})
 			}
 		} catch (error) {
@@ -225,6 +228,7 @@ export async function initDB() {
 					table.integer('equipmentId').unsigned()
 					table.integer('hoursWorked')
 					table.integer('hoursIdle')
+					table.boolean('deleted').defaultTo(false).notNullable()
 					table.text('comments')
 					table.foreign('userId').references('users.id')
 					table.foreign('objectId').references('objects.id')

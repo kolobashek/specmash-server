@@ -3,7 +3,7 @@ import ContrAgent from './contrAgent'
 
 class Object extends Model {
 	static get tableName() {
-		return 'object'
+		return 'objects'
 	}
 	static get relationMappings() {
 		return {
@@ -23,20 +23,9 @@ class Object extends Model {
 	}
 	static async getAll() {
 		try {
-			// const objects = await Object.query()
-			// 	.select(
-			// 		`object.id`,
-			// 		'object.name',
-			// 		'dimensions',
-			// 		'weight',
-			// 		'licensePlate',
-			// 		'nickname',
-			// 		'objectTypes.name as type'
-			// 	)
-			// 	.leftJoin('objectTypes', 'object.typeId', 'objectTypes.id')
-			// 	.from('object')
-			// return objects
+			const objects = await Object.query()
 			console.log('objects.getAll')
+			return objects
 		} catch (error) {
 			return new Error(error as string)
 		}
@@ -54,6 +43,18 @@ class Object extends Model {
 			// return newObject
 		} catch (error) {
 			return new Error(error as string)
+		}
+	}
+
+	static async getObjectById(id: number) {
+		try {
+			const object = await this.query().findById(id)
+			if (!object) {
+				return new Error('Object not found')
+			}
+			return object
+		} catch (error) {
+			return Promise.reject(error)
 		}
 	}
 }
