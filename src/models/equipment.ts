@@ -53,6 +53,42 @@ class Equipment extends Model {
 			return new Error(error as string)
 		}
 	}
+
+	static async getEquipmentById(id: number) {
+		try {
+			const equipment = await this.query()
+				.findById(id)
+				.select(
+					`equipment.id`,
+					'equipment.name',
+					'dimensions',
+					'weight',
+					'licensePlate',
+					'nickname',
+					'equipmentTypes.name as type'
+				)
+				.leftJoin('equipmentTypes', 'equipment.typeId', 'equipmentTypes.id')
+				.from('equipment')
+			if (!equipment) {
+				return new Error('Equipment not found')
+			}
+			return equipment
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
+	static async update(equipment: EquipmentAttributes) {
+		try {
+			const rowResult = await this.query().update(equipment).where({ id: equipment.id })
+			if (rowResult > 0) {
+				const newUser = await Equipment.getEquipmentById(equipment.id)
+				return newUser
+			}
+			return new Error('Оборудование не обновлено')
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
 }
 
 export default Equipment

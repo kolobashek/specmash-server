@@ -12,6 +12,7 @@ const typeDefs = `#graphql
     getEquipmentTypes: [EquipmentType]!
 
     equipments: [Equipment]!
+    equipment(id: ID!): Equipment
     equipmentByType(typeId: ID!): [Equipment]!
 
     objects: [Object]!

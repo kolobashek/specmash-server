@@ -102,6 +102,10 @@ const resolvers = {
 			const equipments = await Equipment.getAll()
 			return equipments
 		},
+		equipment: async (parent: any, { id }: { id: number }, ctx: any) => {
+			const equipment = await Equipment.getEquipmentById(id)
+			return equipment
+		},
 	},
 	Mutation: {
 		register: async (_: any, { input }: { input: CreateUserInput }) => {
@@ -165,6 +169,15 @@ const resolvers = {
 			}
 			return new GraphQLError('Недостаточные права доступа')
 		},
+		updateEquipment: async (parent: any, { input }: { input: UpdateEquipmentInput }, ctx: any) => {
+			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
+			if (userHasPermissions) {
+				const user = await Equipment.update(input)
+				console.log(user)
+				return user
+			}
+			return new GraphQLError('Недостаточно прав')
+		},
 	},
 }
 
@@ -193,6 +206,15 @@ type UpdateUserInput = {
 	isActive?: boolean
 	nickname?: string
 	comment?: string
+}
+type UpdateEquipmentInput = {
+	id: number
+	name: string
+	type: string
+	dimensions?: string
+	weight?: number
+	licensePlate?: string
+	nickname?: string
 }
 interface LoginInput {
 	phone: string

@@ -3,7 +3,6 @@ const typeDefs = `#graphql
   input UserIdInput {
     userId: Int!
   }
-
   input CreateUserInput {
     name: String!
     phone: String!
@@ -47,6 +46,24 @@ const typeDefs = `#graphql
     contacts: String
     address: String
     contrAgents: [Int!]
+  }
+
+  input CreateEquipmentInput {
+    name: String!
+    type: String!
+    dimensions: String
+    weight: Int
+    licensePlate: String
+    nickname: String
+  }
+  input UpdateEquipmentInput {
+    id: Int!
+    name: String
+    type: String
+    dimensions: String
+    weight: Int
+    licensePlate: String
+    nickname: String
   }
 
 `
