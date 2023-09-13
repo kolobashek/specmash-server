@@ -1,0 +1,354 @@
+{
+	"roles": {
+		"columns": {
+			"id": {
+				"type": "increments",
+				"primary": true
+			},
+			"name": {
+				"type": "string",
+				"maxLength": 255,
+				"notNullable": true,
+				"unique": true
+			}
+		},
+		"data": [
+			{ "name": "admin" },
+			{ "name": "manager" },
+			{ "name": "driver" },
+			{ "name": "UNDEFINED" }
+		]
+	},
+	"users": {
+		"columns": {
+			"id": {
+				"type": "increments",
+				"primary": true
+			},
+			"phone": {
+				"type": "string",
+				"maxLength": 255,
+				"notNullable": true,
+				"unique": true
+			},
+			"password": {
+				"type": "string",
+				"maxLength": 255,
+				"notNullable": true
+			},
+			"name": {
+				"type": "string",
+				"maxLength": 255,
+				"notNullable": true
+			},
+			"nickname": {
+				"type": "string",
+				"maxLength": 255
+			},
+			"comment": {
+				"type": "string",
+				"maxLength": 255
+			},
+			"equipmentTypeIds": {
+				"type": "integer[]"
+			},
+			"isActive": {
+				"type": "boolean",
+				"defaultTo": false,
+				"notNullable": true
+			},
+			"roleId": {
+				"type": "integer",
+				"unsigned": true,
+				"notNullable": true,
+				"defaultTo": 3
+			}
+		},
+		"foreignKeys": [
+			{
+				"columns": ["roleId"],
+				"references": {
+					"table": "roles",
+					"columns": ["id"]
+				}
+			}
+		],
+		"data": [
+			{
+				"phone": "123",
+				"name": "admin",
+				"password": "$2b$10$oeG6fHl5I/oPnnTBEYPKEuEKp/Cr3MUlTRIIqLsf4Dbg3p6ZS.8iW",
+				"roleId": 1,
+				"isActive": true
+			},
+			{
+				"phone": "1234",
+				"name": "manager",
+				"password": "$2b$10$oeG6fHl5I/oPnnTBEYPKEuEKp/Cr3MUlTRIIqLsf4Dbg3p6ZS.8iW",
+				"roleId": 2,
+				"isActive": true
+			},
+			{
+				"phone": "12345",
+				"name": "driver",
+				"password": "$2b$10$oeG6fHl5I/oPnnTBEYPKEuEKp/Cr3MUlTRIIqLsf4Dbg3p6ZS.8iW",
+				"roleId": 3,
+				"isActive": true
+			}
+		]
+	},
+	"equipmentTypes": {
+		"columns": {
+			"id": {
+				"type": "increments",
+				"primary": true
+			},
+			"name": {
+				"type": "string",
+				"maxLength": 255,
+				"notNullable": true,
+				"unique": true
+			},
+			"deleted": {
+				"type": "boolean",
+				"defaultTo": false,
+				"notNullable": true
+			}
+		},
+		"data": [
+			{ "name": "Фронтальный погрузчик" },
+			{ "name": "Самосвал" },
+			{ "name": "Бульдозер" },
+			{ "name": "Экскаватор" },
+			{ "name": "Трактор" },
+			{ "name": "Самопогрузчик" },
+			{ "name": "Легковой автомобиль" },
+			{ "name": "Микроавтобус" }
+		]
+	},
+	"equipment": {
+		"columns": {
+			"id": {
+				"type": "increments",
+				"primary": true
+			},
+			"typeId": {
+				"type": "integer",
+				"unsigned": true
+			},
+			"name": {
+				"type": "string",
+				"maxLength": 255,
+				"notNullable": true
+			},
+			"dimensions": {
+				"type": "string",
+				"maxLength": 255
+			},
+			"weight": {
+				"type": "integer"
+			},
+			"licensePlate": {
+				"type": "string",
+				"maxLength": 255
+			},
+			"nickname": {
+				"type": "string",
+				"maxLength": 255
+			},
+			"deleted": {
+				"type": "boolean",
+				"defaultTo": false,
+				"notNullable": true
+			}
+		},
+		"foreignKeys": [
+			{
+				"columns": ["typeId"],
+				"references": {
+					"table": "equipmentTypes",
+					"columns": ["id"]
+				}
+			}
+		]
+	},
+	"userEquipmentTypes": {
+		"columns": {
+			"userId": {
+				"type": "integer",
+				"unsigned": true
+			},
+			"equipmentTypeId": {
+				"type": "integer",
+				"unsigned": true
+			}
+		},
+		"foreignKeys": [
+			{
+				"columns": ["userId"],
+				"references": {
+					"table": "users",
+					"columns": ["id"]
+				}
+			},
+			{
+				"columns": ["equipmentTypeId"],
+				"references": {
+					"table": "equipmentTypes",
+					"columns": ["id"]
+				}
+			}
+		]
+	},
+	"contrAgents": {
+		"columns": {
+			"id": {
+				"type": "increments",
+				"primary": true
+			},
+			"name": {
+				"type": "string",
+				"maxLength": 255,
+				"notNullable": true
+			},
+			"contacts": {
+				"type": "string",
+				"maxLength": 255
+			},
+			"address": {
+				"type": "string",
+				"maxLength": 255
+			},
+			"comments": {
+				"type": "string",
+				"maxLength": 255
+			},
+			"deleted": {
+				"type": "boolean",
+				"defaultTo": false,
+				"notNullable": true
+			}
+		}
+	},
+	"objects": {
+		"columns": {
+			"id": {
+				"type": "increments",
+				"primary": true
+			},
+			"name": {
+				"type": "string",
+				"maxLength": 255,
+				"notNullable": true
+			},
+			"contacts": {
+				"type": "string",
+				"maxLength": 255
+			},
+			"address": {
+				"type": "string",
+				"maxLength": 255
+			},
+			"deleted": {
+				"type": "boolean",
+				"defaultTo": false,
+				"notNullable": true
+			}
+		}
+	},
+	"contrAgentsObjects": {
+		"columns": {
+			"id": {
+				"type": "increments",
+				"primary": true
+			},
+			"contrAgentId": {
+				"type": "integer",
+				"unsigned": true
+			},
+			"objectId": {
+				"type": "integer",
+				"unsigned": true
+			}
+		},
+		"foreignKeys": [
+			{
+				"columns": ["contrAgentId"],
+				"references": {
+					"table": "contrAgents",
+					"columns": ["id"]
+				}
+			},
+			{
+				"columns": ["objectId"],
+				"references": {
+					"table": "objects",
+					"columns": ["id"]
+				}
+			}
+		]
+	},
+	"travelLogs": {
+		"columns": {
+			"id": {
+				"type": "increments",
+				"primary": true
+			},
+			"date": {
+				"type": "date"
+			},
+			"shiftNumber": {
+				"type": "integer"
+			},
+			"userId": {
+				"type": "integer",
+				"unsigned": true
+			},
+			"objectId": {
+				"type": "integer",
+				"unsigned": true
+			},
+			"equipmentId": {
+				"type": "integer",
+				"unsigned": true
+			},
+			"hoursWorked": {
+				"type": "integer"
+			},
+			"hoursIdle": {
+				"type": "integer"
+			},
+			"deleted": {
+				"type": "boolean",
+				"defaultTo": false,
+				"notNullable": true
+			},
+			"comments": {
+				"type": "text"
+			}
+		},
+		"foreignKeys": [
+			{
+				"columns": ["userId"],
+				"references": {
+					"table": "users",
+					"columns": ["id"]
+				}
+			},
+			{
+				"columns": ["objectId"],
+				"references": {
+					"table": "objects",
+					"columns": ["id"]
+				}
+			},
+			{
+				"columns": ["equipmentId"],
+				"references": {
+					"table": "equipment",
+					"columns": ["id"]
+				}
+			}
+		]
+	}
+}
