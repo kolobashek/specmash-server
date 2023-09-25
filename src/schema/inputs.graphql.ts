@@ -38,14 +38,29 @@ const typeDefs = `#graphql
     contacts: String
     address: String
     comments: String
-    objects: [Int!]
+    objects: [Int]
+  }
+  input UpdateContrAgentInput {
+    id: Int!
+    name: String
+    contacts: String
+    address: String
+    comments: String
+    objects: [Int]
   }
 
   input CreateObjectInput {
     name: String!
     contacts: String
     address: String
-    contrAgents: [Int!]
+    contrAgents: [Int]
+  }
+  input UpdateObjectInput {
+    id: Int!
+    name: String
+    contacts: String
+    address: String
+    contrAgents: [Int]
   }
 
   input CreateEquipmentInput {

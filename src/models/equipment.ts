@@ -9,7 +9,7 @@ class Equipment extends Model {
 		return {
 			type: {
 				relation: Model.BelongsToOneRelation,
-				modelClass: Equipment,
+				modelClass: EquipmentType,
 				join: {
 					from: 'equipment.typeId',
 					to: 'equipmentTypes.id',
@@ -105,4 +105,14 @@ export interface EquipmentAttributesInput {
 	nickname?: string
 
 	[key: string]: string | undefined | number
+}
+
+export type UpdateEquipmentInput = {
+	id: number
+	name: string
+	type: string
+	dimensions?: string
+	weight?: number
+	licensePlate?: string
+	nickname?: string
 }

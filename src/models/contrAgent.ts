@@ -29,17 +29,36 @@ class ContrAgent extends Model {
 			return new Error(error as string)
 		}
 	}
+
+	static async getContrAgentById(id: number) {
+		try {
+			const contrAgent = await this.query().findById(id)
+			if (!contrAgent) {
+				return new Error('ContrAgent not found')
+			}
+			return contrAgent
+		} catch (error) {
+			return Promise.reject(error)
+		}
+	}
 	static async create(input: ContrAgentAttributesInput) {
 		try {
-			// const type = await ContrAgentType.getTypeByName(input.type)
-			// if (type instanceof Error) {
-			// 	return type
-			// }
-			// const newContrAgent = await ContrAgent.query().insert({
-			// 	...input,
-			// 	typeId: type.id,
-			// })
-			// return newContrAgent
+			const newContrAgent = await ContrAgent.query().insert(input)
+			return newContrAgent
+		} catch (error) {
+			return new Error(error as string)
+		}
+	}
+	static async update(input: ContrAgentAttributes) {
+		try {
+			const contrAgent = await ContrAgent.query().findById(input.id)
+			if (!contrAgent) {
+				return new Error('ContrAgent not found')
+			}
+			const updatedContrAgent = await contrAgent.$query().patchAndFetch({
+				...input,
+			})
+			return updatedContrAgent
 		} catch (error) {
 			return new Error(error as string)
 		}
@@ -48,14 +67,14 @@ class ContrAgent extends Model {
 
 export default ContrAgent
 
-interface ContrAgentAttributes extends ContrAgentAttributesInput {
+export interface ContrAgentAttributes extends ContrAgentAttributesInput {
 	id: number
 }
 export interface ContrAgentAttributesInput {
 	name: string
 	contacts?: string
 	address?: string
-	contrAgent?: Object[]
+	contrAgent?: number[]
 
-	[key: string]: string | undefined | number | Object[]
+	[key: string]: string | undefined | number | number[]
 }

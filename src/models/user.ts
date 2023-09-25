@@ -261,7 +261,7 @@ class User extends Model implements User {
 }
 export default User
 
-type UpdateUserInput = {
+export type UpdateUserInput = {
 	id: number
 	name: string
 	nickname?: string
@@ -280,4 +280,23 @@ type UserDbInput = {
 	comment: string | undefined
 	password: string | undefined
 	role: string
+}
+export type CreateUserInput = {
+	name: string
+	password: string
+	phone: string
+	roleId?: number
+	isActive?: boolean
+	nickname?: string
+	comment?: string
+}
+export type UserIdInput = {
+	input: {
+		userId: number
+	}
+}
+
+export interface LoginInput {
+	phone: string
+	password: string
 }

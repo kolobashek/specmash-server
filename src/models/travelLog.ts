@@ -133,3 +133,7 @@ export interface CreateTravelLogInput {
 interface TravelLog extends CreateTravelLogInput {
 	id: number
 }
+
+export interface CreateTravelLogPayload {
+	input: CreateTravelLogInput
+}

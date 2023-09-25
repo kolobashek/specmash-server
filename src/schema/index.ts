@@ -7,7 +7,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema'
 import { mergeTypeDefs } from '@graphql-tools/merge'
 import { GraphQLError, GraphQLSchema, defaultFieldResolver } from 'graphql'
 import { MapperKind, getDirective, mapSchema } from '@graphql-tools/utils'
-import resolvers from '../resolvers.ts'
+import resolvers from '../resolvers/index.ts'
 
 const types = [Schemas, Mutations, Queries, adminQueries, Inputs]
 const typeDefs = mergeTypeDefs(types)

@@ -49,7 +49,7 @@ export async function initDB() {
 					table.string('name', 255).notNullable()
 					table.string('nickname', 255)
 					table.string('comment', 255)
-					table.specificType('equipmentTypeIds', 'integer[]')
+					table.text('equipmentTypeIds')
 					table.boolean('isActive').defaultTo(false).notNullable()
 					table.integer('roleId').notNullable().defaultTo(3).unsigned()
 					table.foreign('roleId').references('roles.id')
@@ -137,6 +137,7 @@ export async function initDB() {
 					table.string('name', 255).notNullable()
 					table.string('dimensions', 255)
 					table.integer('weight')
+					table.integer('tailNumber', 5)
 					table.string('licensePlate', 255)
 					table.string('nickname', 255)
 					table.boolean('deleted').defaultTo(false).notNullable()
@@ -152,9 +153,9 @@ export async function initDB() {
 			const userEquipmentTypesExists = await knex.schema.hasTable('userEquipmentTypes')
 			if (!userEquipmentTypesExists) {
 				await knex.schema.createTable('userEquipmentTypes', (table) => {
-					table.integer('userId').unsigned()
+					table.integer('userId').unsigned().notNullable()
 					table.foreign('userId').references('users.id')
-					table.integer('equipmentTypeId').unsigned()
+					table.integer('equipmentTypeId').unsigned().notNullable()
 					table.foreign('equipmentTypeId').references('equipmentTypes.id')
 				})
 			}

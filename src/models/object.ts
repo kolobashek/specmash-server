@@ -32,15 +32,8 @@ class Object extends Model {
 	}
 	static async create(input: ObjectAttributesInput) {
 		try {
-			// const type = await ObjectType.getTypeByName(input.type)
-			// if (type instanceof Error) {
-			// 	return type
-			// }
-			// const newObject = await Object.query().insert({
-			// 	...input,
-			// 	typeId: type.id,
-			// })
-			// return newObject
+			const newObject = await Object.query().insert(input)
+			return newObject
 		} catch (error) {
 			return new Error(error as string)
 		}
@@ -57,11 +50,25 @@ class Object extends Model {
 			return Promise.reject(error)
 		}
 	}
+	static async update(input: ObjectAttributes) {
+		try {
+			const contrAgent = await Object.query().findById(input.id)
+			if (!contrAgent) {
+				return new Error('Object not found')
+			}
+			const updatedObject = await contrAgent.$query().patchAndFetch({
+				...input,
+			})
+			return updatedObject
+		} catch (error) {
+			return new Error(error as string)
+		}
+	}
 }
 
 export default Object
 
-interface ObjectAttributes extends ObjectAttributesInput {
+export interface ObjectAttributes extends ObjectAttributesInput {
 	id: number
 }
 export interface ObjectAttributesInput {
