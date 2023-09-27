@@ -8,6 +8,7 @@ const typeDefs = `#graphql
     login(phone: String!, password: String!): LoginPayload
     #Shifts
     createTravelLog(input: CreateTravelLogInput!): TravelLog
+    updateTravelLog(input: UpdateTravelLogInput!): TravelLog
     #Machines
     createEquipment(input: CreateEquipmentInput): Equipment
     updateEquipment(input: UpdateEquipmentInput!): Equipment

@@ -1,5 +1,6 @@
+import Object from './object'
+import { BaseModel } from './baseModel'
 import { Model } from 'objection'
-import Object from './contrAgent'
 
 class ContrAgent extends Model {
 	static get tableName() {
@@ -23,7 +24,8 @@ class ContrAgent extends Model {
 	}
 	static async getAll() {
 		try {
-			const contrAgents = await ContrAgent.query()
+			const contrAgents = await ContrAgent.query().withGraphFetched('objects')
+
 			return contrAgents
 		} catch (error) {
 			return new Error(error as string)
@@ -32,7 +34,7 @@ class ContrAgent extends Model {
 
 	static async getContrAgentById(id: number) {
 		try {
-			const contrAgent = await this.query().findById(id)
+			const contrAgent = await this.query().findById(id).withGraphFetched('objects')
 			if (!contrAgent) {
 				return new Error('ContrAgent not found')
 			}
@@ -42,22 +44,30 @@ class ContrAgent extends Model {
 		}
 	}
 	static async create(input: ContrAgentAttributesInput) {
+		const { object, ...contrAgentData } = input
 		try {
-			const newContrAgent = await ContrAgent.query().insert(input)
+			const newContrAgent = await ContrAgent.query().insert(contrAgentData)
+			if (object) {
+				await newContrAgent.$relatedQuery('objects').relate(object)
+			}
 			return newContrAgent
 		} catch (error) {
 			return new Error(error as string)
 		}
 	}
 	static async update(input: ContrAgentAttributes) {
+		const { objects, ...contrAgentData } = input
 		try {
-			const contrAgent = await ContrAgent.query().findById(input.id)
+			const contrAgent = await ContrAgent.query().findById(contrAgentData.id)
 			if (!contrAgent) {
 				return new Error('ContrAgent not found')
 			}
-			const updatedContrAgent = await contrAgent.$query().patchAndFetch({
-				...input,
+			const updatedContrAgent = await ContrAgent.query().patchAndFetch({
+				...contrAgentData,
 			})
+			if (objects) {
+				await contrAgent.$relatedQuery('objects').relate(objects)
+			}
 			return updatedContrAgent
 		} catch (error) {
 			return new Error(error as string)
@@ -74,7 +84,12 @@ export interface ContrAgentAttributesInput {
 	name: string
 	contacts?: string
 	address?: string
-	contrAgent?: number[]
+	objects?: IObject[]
 
-	[key: string]: string | undefined | number | number[]
+	[key: string]: string | undefined | number | IObject[]
+}
+
+interface IObject {
+	id: number
+	name: string
 }

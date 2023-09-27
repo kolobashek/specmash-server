@@ -205,12 +205,8 @@ export async function initDB() {
 
 		if (!tableExists) {
 			await knex.schema.createTable('contrAgentsObjects', (table) => {
-				table.increments('id').primary()
-				table.integer('contrAgentId').unsigned()
-				table.integer('objectId').unsigned()
-
-				table.foreign('contrAgentId').references('contrAgents.id')
-				table.foreign('objectId').references('objects.id')
+				table.integer('contrAgentId').unsigned().references('contrAgents.id')
+				table.integer('objectId').unsigned().references('objects.id')
 			})
 		}
 	}

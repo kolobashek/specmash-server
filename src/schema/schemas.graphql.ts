@@ -45,6 +45,10 @@ const typeDefs = `#graphql
     address: String
     contrAgents: [ContrAgent]
   }
+  type ObjectMini {
+    id: ID!
+    name: String!
+  }
   type ContrAgent {
     id: ID!
     name: String!
@@ -52,6 +56,10 @@ const typeDefs = `#graphql
     address: String
     comments: String
     objects: [Object]
+  }
+  type ContrAgentMini {
+    id: ID!
+    name: String!
   }
   type TravelLog {
     id: ID!

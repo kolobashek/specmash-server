@@ -23,25 +23,16 @@ class Object extends Model {
 	}
 	static async getAll() {
 		try {
-			const objects = await Object.query()
+			const objects = await Object.query().withGraphFetched('contrAgents')
 			console.log('objects.getAll')
 			return objects
 		} catch (error) {
 			return new Error(error as string)
 		}
 	}
-	static async create(input: ObjectAttributesInput) {
-		try {
-			const newObject = await Object.query().insert(input)
-			return newObject
-		} catch (error) {
-			return new Error(error as string)
-		}
-	}
-
 	static async getObjectById(id: number) {
 		try {
-			const object = await this.query().findById(id)
+			const object = await this.query().findById(id).withGraphFetched('contrAgents')
 			if (!object) {
 				return new Error('Object not found')
 			}
@@ -50,15 +41,33 @@ class Object extends Model {
 			return Promise.reject(error)
 		}
 	}
+
+	static async create(input: ObjectAttributesInput) {
+		const { contrAgents, ...objectData } = input
+		try {
+			const newObject = await Object.query().insertAndFetch(objectData)
+			if (contrAgents) {
+				await newObject.$relatedQuery('contrAgents').relate(contrAgents)
+			}
+			return newObject
+		} catch (error) {
+			return new Error(error as string)
+		}
+	}
 	static async update(input: ObjectAttributes) {
 		try {
-			const contrAgent = await Object.query().findById(input.id)
-			if (!contrAgent) {
+			const { contrAgents, ...objectData } = input
+			const object = await Object.query().findById(objectData.id)
+			if (!object) {
 				return new Error('Object not found')
 			}
-			const updatedObject = await contrAgent.$query().patchAndFetch({
-				...input,
+			const updatedObject = await object.$query().patchAndFetch({
+				...objectData,
 			})
+			if (contrAgents) {
+				await object.$relatedQuery('contrAgents').relate(contrAgents)
+			}
+			// const updatedObject = await Object.query().upsertGraph(graphData)
 			return updatedObject
 		} catch (error) {
 			return new Error(error as string)
@@ -75,7 +84,7 @@ export interface ObjectAttributesInput {
 	name: string
 	contacts?: string
 	address?: string
-	contrAgents?: ContrAgent[]
+	contrAgents?: number[]
 
-	[key: string]: string | undefined | number | ContrAgent[]
+	// [key: string]: string | undefined | number | number[]
 }

@@ -40,6 +40,19 @@ const typeDefs = `#graphql
     comments: String
     objects: [Int]
   }
+
+  input UpdateTravelLogInput {
+    id: Int!
+    driverId: Int
+    objectId: Int
+    equipmentId: Int
+    date: String!
+    shiftNumber: Int!
+    hoursWorked: Float
+    breaks: Float
+    comments: String
+  }
+  
   input UpdateContrAgentInput {
     id: Int!
     name: String
