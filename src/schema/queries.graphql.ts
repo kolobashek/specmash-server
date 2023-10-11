@@ -1,6 +1,6 @@
 const typeDefs = `#graphql
   type Query {
-    # users: [User!] @auth(role: admin)
+    users(input: UsersFilterInput): [User]!
     # user(id: ID!): User @auth(role: manager)
     me: User
     user(id:ID!): User

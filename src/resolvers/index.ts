@@ -5,15 +5,15 @@ import { UserResolver } from './user'
 import { EquipmentResolver } from './equipment'
 import { ContrAgentResolver } from './contrAgent'
 import logger from '../config/logger'
-import User from '../models/user'
+import { User } from '../models/user'
 
 export const resolverPermissions = async (ctx: any, ...resolvedRoles: string[]) => {
 	const token: string = ctx.request.headers.headersInit.authorization
 	if (!token) return false
 
-	const user = await User.getUserByHash(token)
+	const user = await User.checkAuthByToken(token)
 
-	if (user instanceof Error) return false
+	if (!user) return false
 
 	return resolvedRoles.includes(user.role)
 }

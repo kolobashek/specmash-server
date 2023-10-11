@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql'
 import { resolverPermissions } from '.'
-import TravelLog, { CreateTravelLogPayload } from '../models/travelLog'
+import TravelLog, { CreateTravelLogPayload, UpdateTravelLogPayload } from '../models/travelLog'
 
 export const TravelLogResolver = {
 	Query: {
@@ -12,8 +12,23 @@ export const TravelLogResolver = {
 		createTravelLog: async (parent: any, { input }: CreateTravelLogPayload, ctx: any) => {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
-				const travelLog = await TravelLog.create(input)
+				const payload = {
+					...input,
+					// driverId: input.driver?.id,
+					// equipmentId: input.equipment.id,
+					// objectId: input.object?.id,
+					// contrAgentId: input.contrAgent?.id,
+				}
+				const travelLog = await TravelLog.create(payload)
 				return travelLog
+			}
+			return new GraphQLError('Недостаточные права доступа')
+		},
+		updateTravelLog: async (parent: any, { input }: UpdateTravelLogPayload, ctx: any) => {
+			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
+			if (userHasPermissions) {
+				const updatedTravelLog = await TravelLog.update(input)
+				return updatedTravelLog
 			}
 			return new GraphQLError('Недостаточные права доступа')
 		},

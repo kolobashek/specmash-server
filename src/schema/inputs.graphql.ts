@@ -3,6 +3,10 @@ const typeDefs = `#graphql
   input UserIdInput {
     userId: Int!
   }
+  input IdName {
+    id: Int
+    name: String
+  }
   input CreateUserInput {
     name: String!
     phone: String!
@@ -23,9 +27,10 @@ const typeDefs = `#graphql
   }
 
   input CreateTravelLogInput {
-    driverId: Int
-    objectId: Int
-    equipmentId: Int
+    driver: Int
+    object: Int
+    contrAgent: Int
+    equipment: Int
     date: String!
     shiftNumber: Int!
     hoursWorked: Float
@@ -55,7 +60,7 @@ const typeDefs = `#graphql
   
   input UpdateContrAgentInput {
     id: Int!
-    name: String
+    name: String!
     contacts: String
     address: String
     comments: String
@@ -70,7 +75,7 @@ const typeDefs = `#graphql
   }
   input UpdateObjectInput {
     id: Int!
-    name: String
+    name: String!
     contacts: String
     address: String
     contrAgents: [Int]
@@ -86,13 +91,17 @@ const typeDefs = `#graphql
   }
   input UpdateEquipmentInput {
     id: Int!
-    name: String
+    name: String!
     type: String
     dimensions: String
     weight: Int
     licensePlate: String
     nickname: String
   }
-
+  input UsersFilterInput {
+    name: String
+	  role: String
+	  isActive: Boolean
+  }
 `
 export default typeDefs

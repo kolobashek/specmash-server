@@ -1,7 +1,6 @@
 import { GraphQLError } from 'graphql'
 import { resolverPermissions } from '.'
-import User, { CreateUserInput, LoginInput, UpdateUserInput, UserIdInput } from '../models/user'
-import Role from '../models/role'
+import { User, IUserInput, LoginInput, UserIdInput } from '../models/user'
 
 export const AuthResolver = {
 	Query: {
@@ -9,10 +8,8 @@ export const AuthResolver = {
 			// The content of the JWT can be found in the context
 			const token: string = ctx.request.headers.headersInit.authorization
 			if (token) {
-				const user = await User.getUserByHash(token)
-				if (user instanceof Error) {
-					return new GraphQLError(`${user}`)
-				} else if (!user) {
+				const user = await User.checkAuthByToken(token)
+				if (!user) {
 					return new GraphQLError('Неверный токен')
 				}
 				return user
@@ -22,16 +19,16 @@ export const AuthResolver = {
 		},
 	},
 	Mutation: {
-		register: async (_: any, { input }: { input: CreateUserInput }) => {
+		register: async (_: any, { input }: { input: IUserInput }) => {
 			try {
-				const user = await User.create(input)
+				const user = await User.create({ ...input })
 				return user
 			} catch (error: any) {
 				return new GraphQLError(error.message)
 			}
 		},
 		login: async (parent: any, { phone, password }: LoginInput, ctx: any) => {
-			const token = await User.login(phone, password)
+			const token = await User.login({ phone, password })
 			if (token instanceof Error) {
 				return new GraphQLError('Неверный телефон или пароль')
 			}
@@ -46,16 +43,6 @@ export const AuthResolver = {
 				httpOnly: true,
 			})
 			return { token }
-		},
-		toggleUserActive: async (parent: any, { input }: UserIdInput, ctx: any) => {
-			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
-			if (userHasPermissions) {
-				const { userId } = input
-				// Активация пользователя по id
-				const result = await User.toggleUserActive(userId)
-				return result
-			}
-			return new GraphQLError('Недостаточно прав')
 		},
 	},
 }

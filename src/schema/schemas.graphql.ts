@@ -3,7 +3,7 @@ const typeDefs = `#graphql
     id: ID!
     name: String!
     nickname: String
-    password: String!
+    password: String
     phone: String!
     role: Role
     isActive: Boolean!
@@ -20,7 +20,7 @@ const typeDefs = `#graphql
     manager
     driver
     UNDEFINED
-}
+  }
   type Auth {
     token: String!
     user: User!
@@ -45,10 +45,6 @@ const typeDefs = `#graphql
     address: String
     contrAgents: [ContrAgent]
   }
-  type ObjectMini {
-    id: ID!
-    name: String!
-  }
   type ContrAgent {
     id: ID!
     name: String!
@@ -57,20 +53,17 @@ const typeDefs = `#graphql
     comments: String
     objects: [Object]
   }
-  type ContrAgentMini {
-    id: ID!
-    name: String!
-  }
   type TravelLog {
     id: ID!
     driver: User
-    object: Object
+    object: Object 
+    contrAgent: ContrAgent
     equipment: Equipment
     date: String
     shiftNumber: Int
     hours: Float
     breaks: Float
-    comment: String
+    comments: String
   }
 `
 export default typeDefs

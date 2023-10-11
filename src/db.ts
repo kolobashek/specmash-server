@@ -1,257 +1,275 @@
 // Импорты
-import Knex from 'knex'
+// import Knex from 'knex'
+// import knexConfig from './config/knexfile'
+// import { Model } from 'objection'
 import logger from './config/logger.ts'
-import knexConfig from './config/knexfile'
-import { Model } from 'objection'
+import * as dotenv from 'dotenv'
+import { Sequelize } from 'sequelize'
 
-export const knex = Knex(knexConfig.development)
+// export const knex = Knex(knexConfig.development)
 
-export const startDbServer = async () => {
-	Model.knex(knex)
-	await initDB()
-}
+dotenv.config()
+const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = process.env
 
-// Инициализация БД
-export async function initDB() {
-	// Проверка и создание таблиц
-	const checkRoles = async () => {
-		try {
-			const RolesExists = await knex.schema.hasTable('roles')
-			if (!RolesExists) {
-				await knex.schema.createTable('roles', (table) => {
-					table.increments('id').primary()
-					table.string('name', 255).notNullable().unique()
-				})
-			}
-			const roleNames = ['admin', 'manager', 'driver', 'UNDEFINED']
-			for (const roleName of roleNames) {
-				const roleExists = await knex('roles').where({ name: roleName }).first()
-
-				if (!roleExists) {
-					await knex('roles').insert({
-						name: roleName,
-					})
-				}
-			}
-		} catch (error) {
-			console.error('Ошибка при создании таблицы roles:', error)
-		}
+export const sequelize: Sequelize = new Sequelize(
+	DB_NAME || 'specmash',
+	DB_USER || 'user',
+	DB_PASSWORD,
+	{
+		host: DB_HOST,
+		port: Number(DB_PORT),
+		dialect: 'mariadb',
+		timezone: '+07:00',
+		logging: (...msg) => logger.info(msg),
 	}
-	const checkUsers = async () => {
-		try {
-			const usersExists = await knex.schema.hasTable('users')
+)
 
-			if (!usersExists) {
-				await knex.schema.createTable('users', (table) => {
-					table.increments('id').primary()
-					table.string('phone', 255).notNullable().unique()
-					table.string('password', 255).notNullable()
-					table.string('name', 255).notNullable()
-					table.string('nickname', 255)
-					table.string('comment', 255)
-					table.text('equipmentTypeIds')
-					table.boolean('isActive').defaultTo(false).notNullable()
-					table.integer('roleId').notNullable().defaultTo(3).unsigned()
-					table.foreign('roleId').references('roles.id')
-				})
-			}
-			// Добавление пользователей по умолчанию
-			const users = [
-				{
-					phone: '123',
-					name: 'admin',
-					password: '$2b$10$oeG6fHl5I/oPnnTBEYPKEuEKp/Cr3MUlTRIIqLsf4Dbg3p6ZS.8iW', // 123
-					roleId: 1,
-					isActive: true,
-				},
-				{
-					phone: '1234',
-					name: 'manager',
-					password: '$2b$10$oeG6fHl5I/oPnnTBEYPKEuEKp/Cr3MUlTRIIqLsf4Dbg3p6ZS.8iW', // 123
-					roleId: 2,
-					isActive: true,
-				},
-				{
-					phone: '12345',
-					name: 'driver',
-					password: '$2b$10$oeG6fHl5I/oPnnTBEYPKEuEKp/Cr3MUlTRIIqLsf4Dbg3p6ZS.8iW', // 123
-					roleId: 3,
-					isActive: true,
-				},
-			]
-			for (const user of users) {
-				const userExists = await knex('users').where({ phone: user.phone }).first()
-				if (!userExists) {
-					await knex('users').insert(user)
-				}
-			}
-		} catch (error) {
-			console.error('Ошибка при создании таблицы users:', error)
-		}
-	}
-	// Проверяем наличие таблицы equipmentTypes
-	const checkEquipmentTypes = async () => {
-		try {
-			const equipmentTypesExists = await knex.schema.hasTable('equipmentTypes')
-			if (!equipmentTypesExists) {
-				await knex.schema.createTable('equipmentTypes', (table) => {
-					table.increments('id').primary()
-					table.string('name', 255).notNullable().unique()
-					table.boolean('deleted').defaultTo(false).notNullable()
-				})
-			}
-			const equipmentTypes = [
-				'Фронтальный погрузчик',
-				'Самосвал',
-				'Бульдозер',
-				'Экскаватор',
-				'Трактор',
-				'Самопогрузчик',
-				'Легковой автомобиль',
-				'Микроавтобус',
-			]
+// export const startDbServer = async () => {
+// 	Model.knex(knex)
+// 	await initDB()
+// }
 
-			for (const typeName of equipmentTypes) {
-				const typeExists = await knex('equipmentTypes').where({ name: typeName }).first()
+// // Инициализация БД
+// export async function initDB() {
+// 	// Проверка и создание таблиц
+// 	const checkRoles = async () => {
+// 		try {
+// 			const RolesExists = await knex.schema.hasTable('roles')
+// 			if (!RolesExists) {
+// 				await knex.schema.createTable('roles', (table) => {
+// 					table.increments('id').primary()
+// 					table.string('name', 255).notNullable().unique()
+// 				})
+// 			}
+// 			const roleNames = ['admin', 'manager', 'driver', 'UNDEFINED']
+// 			for (const roleName of roleNames) {
+// 				const roleExists = await knex('roles').where({ name: roleName }).first()
 
-				if (!typeExists) {
-					await knex('equipmentTypes').insert({
-						name: typeName,
-					})
-				}
-			}
-		} catch (error) {
-			console.error(error)
-		}
-	}
+// 				if (!roleExists) {
+// 					await knex('roles').insert({
+// 						name: roleName,
+// 					})
+// 				}
+// 			}
+// 		} catch (error) {
+// 			console.error('Ошибка при создании таблицы roles:', error)
+// 		}
+// 	}
+// 	const checkUsers = async () => {
+// 		try {
+// 			const usersExists = await knex.schema.hasTable('users')
 
-	// Проверяем наличие таблицы equipment
-	const checkEquipment = async () => {
-		try {
-			const equipmentExists = await knex.schema.hasTable('equipment')
+// 			if (!usersExists) {
+// 				await knex.schema.createTable('users', (table) => {
+// 					table.increments('id').primary()
+// 					table.string('phone', 255).notNullable().unique()
+// 					table.string('password', 255).notNullable()
+// 					table.string('name', 255).notNullable()
+// 					table.string('nickname', 255)
+// 					table.string('comment', 255)
+// 					table.text('equipmentTypeIds')
+// 					table.boolean('isActive').defaultTo(false).notNullable()
+// 					table.integer('roleId').notNullable().defaultTo(3).unsigned()
+// 					table.foreign('roleId').references('roles.id')
+// 				})
+// 			}
+// 			// Добавление пользователей по умолчанию
+// 			const users = [
+// 				{
+// 					phone: '123',
+// 					name: 'admin',
+// 					password: '$2b$10$oeG6fHl5I/oPnnTBEYPKEuEKp/Cr3MUlTRIIqLsf4Dbg3p6ZS.8iW', // 123
+// 					roleId: 1,
+// 					isActive: true,
+// 				},
+// 				{
+// 					phone: '1234',
+// 					name: 'manager',
+// 					password: '$2b$10$oeG6fHl5I/oPnnTBEYPKEuEKp/Cr3MUlTRIIqLsf4Dbg3p6ZS.8iW', // 123
+// 					roleId: 2,
+// 					isActive: true,
+// 				},
+// 				{
+// 					phone: '12345',
+// 					name: 'driver',
+// 					password: '$2b$10$oeG6fHl5I/oPnnTBEYPKEuEKp/Cr3MUlTRIIqLsf4Dbg3p6ZS.8iW', // 123
+// 					roleId: 3,
+// 					isActive: true,
+// 				},
+// 			]
+// 			for (const user of users) {
+// 				const userExists = await knex('users').where({ phone: user.phone }).first()
+// 				if (!userExists) {
+// 					await knex('users').insert(user)
+// 				}
+// 			}
+// 		} catch (error) {
+// 			console.error('Ошибка при создании таблицы users:', error)
+// 		}
+// 	}
+// 	// Проверяем наличие таблицы equipmentTypes
+// 	const checkEquipmentTypes = async () => {
+// 		try {
+// 			const equipmentTypesExists = await knex.schema.hasTable('equipmentTypes')
+// 			if (!equipmentTypesExists) {
+// 				await knex.schema.createTable('equipmentTypes', (table) => {
+// 					table.increments('id').primary()
+// 					table.string('name', 255).notNullable().unique()
+// 					table.boolean('deleted').defaultTo(false).notNullable()
+// 				})
+// 			}
+// 			const equipmentTypes = [
+// 				'Фронтальный погрузчик',
+// 				'Самосвал',
+// 				'Бульдозер',
+// 				'Экскаватор',
+// 				'Трактор',
+// 				'Самопогрузчик',
+// 				'Легковой автомобиль',
+// 				'Микроавтобус',
+// 			]
 
-			if (!equipmentExists) {
-				await knex.schema.createTable('equipment', (table) => {
-					table.increments('id').primary()
-					table.integer('typeId').unsigned()
-					table.string('name', 255).notNullable()
-					table.string('dimensions', 255)
-					table.integer('weight')
-					table.integer('tailNumber', 5)
-					table.string('licensePlate', 255)
-					table.string('nickname', 255)
-					table.boolean('deleted').defaultTo(false).notNullable()
-					table.foreign('typeId').references('equipmentTypes.id')
-				})
-			}
-		} catch (error) {
-			console.error('Ошибка при создании таблицы equipment:', error)
-		}
-	}
-	const checkUserEquipmentTypes = async () => {
-		try {
-			const userEquipmentTypesExists = await knex.schema.hasTable('userEquipmentTypes')
-			if (!userEquipmentTypesExists) {
-				await knex.schema.createTable('userEquipmentTypes', (table) => {
-					table.integer('userId').unsigned().notNullable()
-					table.foreign('userId').references('users.id')
-					table.integer('equipmentTypeId').unsigned().notNullable()
-					table.foreign('equipmentTypeId').references('equipmentTypes.id')
-				})
-			}
-		} catch (error) {
-			console.error(error)
-		}
-	}
-	// Проверяем наличие таблицы contrAgents
-	const checkContrAgents = async () => {
-		try {
-			const contrAgentsExists = await knex.schema.hasTable('contrAgents')
+// 			for (const typeName of equipmentTypes) {
+// 				const typeExists = await knex('equipmentTypes').where({ name: typeName }).first()
 
-			if (!contrAgentsExists) {
-				await knex.schema.createTable('contrAgents', (table) => {
-					table.increments('id').primary()
-					table.string('name', 255).notNullable()
-					table.string('contacts', 255)
-					table.string('address', 255)
-					table.string('comments', 255)
-					table.boolean('deleted').defaultTo(false).notNullable()
-				})
-			}
-		} catch (error) {
-			console.error(error)
-		}
-	}
-	// Проверяем наличие таблицы objects
-	const checkObjects = async () => {
-		try {
-			const objectsExists = await knex.schema.hasTable('objects')
+// 				if (!typeExists) {
+// 					await knex('equipmentTypes').insert({
+// 						name: typeName,
+// 					})
+// 				}
+// 			}
+// 		} catch (error) {
+// 			console.error(error)
+// 		}
+// 	}
 
-			if (!objectsExists) {
-				await knex.schema.createTable('objects', (table) => {
-					table.increments('id').primary()
-					table.string('name', 255).notNullable()
-					table.string('contacts', 255)
-					table.string('address', 255)
-					table.boolean('deleted').defaultTo(false).notNullable()
-				})
-			}
-		} catch (error) {
-			console.error(error)
-		}
-	}
-	const checkContrAgentsObjects = async () => {
-		const tableExists = await knex.schema.hasTable('contrAgentsObjects')
+// 	// Проверяем наличие таблицы equipment
+// 	const checkEquipment = async () => {
+// 		try {
+// 			const equipmentExists = await knex.schema.hasTable('equipment')
 
-		if (!tableExists) {
-			await knex.schema.createTable('contrAgentsObjects', (table) => {
-				table.integer('contrAgentId').unsigned().references('contrAgents.id')
-				table.integer('objectId').unsigned().references('objects.id')
-			})
-		}
-	}
-	// Проверяем наличие таблицы travelLogs
-	const checkTravelLogs = async () => {
-		try {
-			const travelLogsExists = await knex.schema.hasTable('travelLogs')
+// 			if (!equipmentExists) {
+// 				await knex.schema.createTable('equipment', (table) => {
+// 					table.increments('id').primary()
+// 					table.integer('typeId').unsigned()
+// 					table.string('name', 255).notNullable()
+// 					table.string('dimensions', 255)
+// 					table.integer('weight')
+// 					table.integer('tailNumber', 5)
+// 					table.string('licensePlate', 255)
+// 					table.string('nickname', 255)
+// 					table.boolean('deleted').defaultTo(false).notNullable()
+// 					table.foreign('typeId').references('equipmentTypes.id')
+// 				})
+// 			}
+// 		} catch (error) {
+// 			console.error('Ошибка при создании таблицы equipment:', error)
+// 		}
+// 	}
+// 	const checkUserEquipmentTypes = async () => {
+// 		try {
+// 			const userEquipmentTypesExists = await knex.schema.hasTable('userEquipmentTypes')
+// 			if (!userEquipmentTypesExists) {
+// 				await knex.schema.createTable('userEquipmentTypes', (table) => {
+// 					table.integer('userId').unsigned().notNullable()
+// 					table.foreign('userId').references('users.id')
+// 					table.integer('equipmentTypeId').unsigned().notNullable()
+// 					table.foreign('equipmentTypeId').references('equipmentTypes.id')
+// 				})
+// 			}
+// 		} catch (error) {
+// 			console.error(error)
+// 		}
+// 	}
+// 	// Проверяем наличие таблицы contrAgents
+// 	const checkContrAgents = async () => {
+// 		try {
+// 			const contrAgentsExists = await knex.schema.hasTable('contrAgents')
 
-			if (!travelLogsExists) {
-				await knex.schema.createTable('travelLogs', (table) => {
-					table.increments('id').primary()
-					table.date('date')
-					table.integer('shiftNumber')
-					table.integer('userId').unsigned()
-					table.integer('objectId').unsigned()
-					table.integer('equipmentId').unsigned()
-					table.integer('hoursWorked')
-					table.integer('hoursIdle')
-					table.boolean('deleted').defaultTo(false).notNullable()
-					table.text('comments')
-					table.foreign('userId').references('users.id')
-					table.foreign('objectId').references('objects.id')
-					table.foreign('equipmentId').references('equipment.id')
-				})
-			}
-		} catch (error) {
-			console.error(error)
-		}
-	}
+// 			if (!contrAgentsExists) {
+// 				await knex.schema.createTable('contrAgents', (table) => {
+// 					table.increments('id').primary()
+// 					table.string('name', 255).notNullable()
+// 					table.string('contacts', 255)
+// 					table.string('address', 255)
+// 					table.string('comments', 255)
+// 					table.boolean('deleted').defaultTo(false).notNullable()
+// 				})
+// 			}
+// 		} catch (error) {
+// 			console.error(error)
+// 		}
+// 	}
+// 	// Проверяем наличие таблицы objects
+// 	const checkObjects = async () => {
+// 		try {
+// 			const objectsExists = await knex.schema.hasTable('objects')
 
-	try {
-		await checkRoles()
-		await checkUsers()
-		await checkUserEquipmentTypes()
-		await checkEquipmentTypes()
-		await checkEquipment()
-		await checkContrAgents()
-		await checkObjects()
-		await checkContrAgentsObjects()
-		await checkTravelLogs()
+// 			if (!objectsExists) {
+// 				await knex.schema.createTable('objects', (table) => {
+// 					table.increments('id').primary()
+// 					table.string('name', 255).notNullable()
+// 					table.string('contacts', 255)
+// 					table.string('address', 255)
+// 					table.boolean('deleted').defaultTo(false).notNullable()
+// 				})
+// 			}
+// 		} catch (error) {
+// 			console.error(error)
+// 		}
+// 	}
+// 	const checkContrAgentsObjects = async () => {
+// 		const tableExists = await knex.schema.hasTable('contrAgentsObjects')
 
-		logger.info('Database initialized successfully')
-	} catch (error) {
-		console.error('Ошибка при инициализации базы данных:', error)
-	}
-}
+// 		if (!tableExists) {
+// 			await knex.schema.createTable('contrAgentsObjects', (table) => {
+// 				table.integer('contrAgentId').unsigned().references('contrAgents.id')
+// 				table.integer('objectId').unsigned().references('objects.id')
+// 			})
+// 		}
+// 	}
+// 	// Проверяем наличие таблицы travelLogs
+// 	const checkTravelLogs = async () => {
+// 		try {
+// 			const travelLogsExists = await knex.schema.hasTable('travelLogs')
 
-export default knex
+// 			if (!travelLogsExists) {
+// 				await knex.schema.createTable('travelLogs', (table) => {
+// 					table.increments('id').primary()
+// 					table.date('date')
+// 					table.integer('shiftNumber')
+// 					table.integer('userId').unsigned()
+// 					table.integer('objectId').unsigned()
+// 					table.integer('equipmentId').unsigned()
+// 					table.integer('hoursWorked')
+// 					table.integer('hoursIdle')
+// 					table.date('deletedAt').defaultTo(null)
+// 					table.text('comments')
+// 					table.foreign('userId').references('users.id')
+// 					table.foreign('objectId').references('objects.id')
+// 					table.foreign('equipmentId').references('equipment.id')
+// 				})
+// 			}
+// 		} catch (error) {
+// 			console.error(error)
+// 		}
+// 	}
+
+// 	try {
+// 		await checkRoles()
+// 		await checkUsers()
+// 		await checkUserEquipmentTypes()
+// 		await checkEquipmentTypes()
+// 		await checkEquipment()
+// 		await checkContrAgents()
+// 		await checkObjects()
+// 		await checkContrAgentsObjects()
+// 		await checkTravelLogs()
+
+// 		logger.info('Database initialized successfully')
+// 	} catch (error) {
+// 		console.error('Ошибка при инициализации базы данных:', error)
+// 	}
+// }
+
+// export default knex

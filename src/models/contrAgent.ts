@@ -1,5 +1,4 @@
 import Object from './object'
-import { BaseModel } from './baseModel'
 import { Model } from 'objection'
 
 class ContrAgent extends Model {
