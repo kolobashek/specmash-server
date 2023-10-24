@@ -1,10 +1,24 @@
 import { DataTypes, Model } from 'sequelize'
 import { sequelize } from '../db'
+import { User } from './user'
 
 export class Role extends Model {
 	declare id: number
 	declare name: string
 	declare comment: string | null
+	static async createDefaultRoles() {
+		await this.create({
+			name: 'admin',
+		})
+
+		await this.create({
+			name: 'manager',
+		})
+
+		await this.create({
+			name: 'driver',
+		})
+	}
 	// constructor(name: string, id: number) {
 	// 	super()
 	// 	this.name = name
@@ -63,21 +77,9 @@ Role.init(
 			type: DataTypes.STRING(255),
 			allowNull: true,
 		},
-		// createdAt: {
-		// 	type: DataTypes.DATE,
-		// 	allowNull: false,
-		// },
-		// updatedAt: {
-		// 	type: DataTypes.DATE,
-		// 	allowNull: false,
-		// },
-		// deletedAt: {
-		// 	type: DataTypes.DATE,
-		// 	allowNull: true,
-		// },
 	},
 	{
-		tableName: 'roles',
+		modelName: 'role',
 		sequelize,
 		paranoid: true,
 	}

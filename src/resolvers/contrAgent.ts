@@ -1,18 +1,18 @@
 import { resolverPermissions } from '.'
-import ContrAgent, { ContrAgentAttributes, ContrAgentAttributesInput } from '../models/contrAgent'
+import { ContrAgent, ContrAgentAttributes, ContrAgentAttributesInput } from '../models/contrAgent'
 import { GraphQLError } from 'graphql'
 
 export const ContrAgentResolver = {
 	Query: {
 		contrAgents: async () => {
 			// получить объекты из БД
-			const contrAgents = await ContrAgent.getAll()
+			const contrAgents = await ContrAgent.findAll()
 			return contrAgents
 		},
 
 		contrAgent: async (parent: any, { id }: { id: number }, ctx: any) => {
 			// получить объекты из БД
-			const contrAgents = await ContrAgent.getContrAgentById(id)
+			const contrAgents = await ContrAgent.findByPk(id)
 			return contrAgents
 		},
 	},
@@ -24,7 +24,7 @@ export const ContrAgentResolver = {
 		) => {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
-				const user = await ContrAgent.create(input)
+				const user = await ContrAgent.create({ ...input })
 				console.log(user)
 				return user
 			}
@@ -33,7 +33,10 @@ export const ContrAgentResolver = {
 		updateContrAgent: async (parent: any, { input }: { input: ContrAgentAttributes }, ctx: any) => {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
-				const user = await ContrAgent.update(input)
+				const user = await ContrAgent.findByPk(input.id)
+				if (user) {
+					await user.update({ ...input })
+				}
 				console.log(user)
 				return user
 			}

@@ -3,6 +3,14 @@ import { sequelize } from '../db'
 import { EquipmentType } from './equipmentType'
 
 export class Equipment extends Model {
+	declare id: number
+	declare name: string
+	declare dimensions: string
+	declare weight: number
+	declare licensePlate: string
+	declare nickname: string
+	declare typeId: number
+	declare comment: string | null
 	// static get tableName() {
 	// 	return 'equipment'
 	// }
@@ -91,6 +99,66 @@ export class Equipment extends Model {
 	// 	}
 	// }
 }
+
+Equipment.init(
+	{
+		id: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+			primaryKey: true,
+			autoIncrement: true,
+		},
+		name: {
+			type: DataTypes.STRING(255),
+			allowNull: false,
+		},
+		licensePlate: {
+			type: DataTypes.STRING(255),
+			allowNull: true,
+		},
+		nickname: {
+			type: DataTypes.STRING(255),
+			allowNull: true,
+		},
+		weight: {
+			type: DataTypes.INTEGER,
+			allowNull: true,
+			defaultValue: 0,
+			validate: {
+				min: 0,
+			},
+		},
+		dimensions: {
+			type: DataTypes.STRING(255),
+			allowNull: true,
+		},
+		typeId: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+		},
+		comment: {
+			type: DataTypes.STRING(255),
+			allowNull: true,
+		},
+		// createdAt: {
+		// 	type: DataTypes.DATE,
+		// 	allowNull: false,
+		// },
+		// updatedAt: {
+		// 	type: DataTypes.DATE,
+		// 	allowNull: false,
+		// },
+		// deletedAt: {
+		// 	type: DataTypes.DATE,
+		// 	allowNull: true,
+		// },
+	},
+	{
+		modelName: 'equipment',
+		sequelize,
+		paranoid: true,
+	}
+)
 
 interface EquipmentAttributes extends EquipmentAttributesInput {
 	id: number

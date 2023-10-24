@@ -12,6 +12,7 @@ import {
 	InferCreationAttributes,
 	CreationOptional,
 } from 'sequelize'
+import { EquipmentType } from './equipmentType'
 
 const signingKey = process.env.JWT_SECRET || 'secret'
 
@@ -268,23 +269,22 @@ export class User extends Model {
 	declare nickname: string | null
 	declare phone: string
 	declare password: string
-	declare role: string
 	declare comment: string | null
-	static async checkAuthByToken(token: string) {
+	static async checkAuthByToken(token: string, opts?: any) {
 		const hash = token.split(' ')[1]
 		const payload = jwt.verify(hash, signingKey)
 		if (typeof payload === 'string') {
 			logger.error(payload)
 			return null
 		}
-		const user = await User.findByPk(payload.id)
+		const user = await User.findByPk(payload.id, opts)
 		if (user === null) {
 			logger.error('Пользователь не найден')
 		}
 		return user
 	}
 	static async login(payload: LoginInput) {
-		const user = await User.findOne({ where: { phone: payload.phone } })
+		const user = await User.findOne({ where: { phone: payload.phone }, include: { all: true } })
 		if (!user) {
 			return new Error('Пользователь не найден')
 		}
@@ -329,21 +329,17 @@ User.init(
 				this.setDataValue('password', hash(value, 10))
 			},
 		},
-		role: {
-			type: DataTypes.STRING(30),
-			allowNull: false,
-		},
-		isActive: {
-			type: DataTypes.BOOLEAN,
-			allowNull: false,
-		},
+		// role: {
+		// 	type: DataTypes.STRING(30),
+		// 	allowNull: false,
+		// },
+		// isActive: {
+		// 	type: DataTypes.BOOLEAN,
+		// 	allowNull: false,
+		// },
 		comment: {
 			type: DataTypes.STRING(255),
 			allowNull: true,
-		},
-		tokenEncrypt: {
-			type: DataTypes.VIRTUAL,
-			async set(token: string) {},
 		},
 		// createdAt: {
 		// 	type: DataTypes.DATE,
@@ -360,10 +356,77 @@ User.init(
 	},
 	{
 		tableName: 'users',
+		modelName: 'User',
 		sequelize,
 		paranoid: true,
 	}
 )
+// class UserRoles extends Model {}
+// UserRoles.init(
+// 	{
+// 		UserId: {
+// 			type: DataTypes.INTEGER,
+// 			references: {
+// 				model: User,
+// 				key: 'id',
+// 			},
+// 		},
+// 		RoleId: {
+// 			type: DataTypes.INTEGER,
+// 			references: {
+// 				model: Role,
+// 				key: 'id',
+// 			},
+// 		},
+// 	},
+// 	{
+// 		modelName: 'userRoles',
+// 		sequelize,
+// 		paranoid: true,
+// 	}
+// )
+// class UserEquipmentTypes extends Model {}
+// UserEquipmentTypes.init(
+// 	{
+// 		UserId: {
+// 			type: DataTypes.INTEGER,
+// 			references: {
+// 				model: User,
+// 				key: 'id',
+// 			},
+// 		},
+// 		EquipmentTypeId: {
+// 			type: DataTypes.INTEGER,
+// 			references: {
+// 				model: EquipmentType,
+// 				key: 'id',
+// 			},
+// 		},
+// 	},
+// 	{
+// 		modelName: 'userEquipmentTypes',
+// 		sequelize,
+// 		paranoid: true,
+// 	}
+// )
+Role.belongsToMany(User, { through: 'UserRoles' })
+User.belongsToMany(Role, { through: 'UserRoles' })
+User.belongsToMany(EquipmentType, {
+	through: 'UserEquipmentTypes',
+	// as: 'equipmentTypes',
+	// sourceKey: 'id',
+	// foreignKey: 'EquipmentTypeId',
+	// foreignKeyConstraint: false,
+	// targetKey: 'id',
+})
+EquipmentType.belongsToMany(User, {
+	through: 'UserEquipmentTypes',
+	// as: 'users',
+	// sourceKey: 'id',
+	// foreignKey: 'EquipmentTypeId',
+	// foreignKeyConstraint: false,
+	// targetKey: 'id',
+})
 
 export interface IUser extends IUserInput {
 	id: number

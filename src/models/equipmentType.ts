@@ -4,6 +4,7 @@ import { sequelize } from '../db'
 export class EquipmentType extends Model {
 	declare id: number
 	declare name: string
+	declare drivingLicenseCategory: string
 	declare comment: string | null
 	// constructor(id?: number, name?: string) {
 	// 	super()
@@ -69,6 +70,10 @@ EquipmentType.init(
 			type: DataTypes.STRING(255),
 			allowNull: false,
 		},
+		drivingLicenseCategory: {
+			type: DataTypes.STRING(10),
+			allowNull: false,
+		},
 		comment: {
 			type: DataTypes.STRING(255),
 			allowNull: true,
@@ -87,7 +92,7 @@ EquipmentType.init(
 		// },
 	},
 	{
-		tableName: 'roles',
+		modelName: 'equipmentType',
 		sequelize,
 		paranoid: true,
 	}
