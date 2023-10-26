@@ -2,7 +2,6 @@ const typeDefs = `#graphql
   type Mutation {
     #Users
     updateUser(input: UpdateUserInput!): User
-    toggleUserActive(input: UserIdInput!): Boolean
     #Auth
     register(input: CreateUserInput!): User
     login(phone: String!, password: String!): LoginPayload

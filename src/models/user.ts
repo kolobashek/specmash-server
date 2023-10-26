@@ -11,10 +11,206 @@ import {
 	InferAttributes,
 	InferCreationAttributes,
 	CreationOptional,
+	BelongsToManyGetAssociationsMixin,
+	BelongsToManySetAssociationsMixin,
 } from 'sequelize'
 import { EquipmentType } from './equipmentType'
 
 const signingKey = process.env.JWT_SECRET || 'secret'
+
+export class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+	declare id: CreationOptional<number>
+	declare name: string
+	declare nickname: string | null
+	declare phone: string
+	declare password: string
+	declare comment: string | null
+	declare getRoles: BelongsToManyGetAssociationsMixin<Role>
+	declare setRoles: BelongsToManySetAssociationsMixin<Role, number>
+	declare addRole: BelongsToManySetAssociationsMixin<Role, number>
+	isActive() {
+		return !this.isSoftDeleted()
+	}
+
+	static async checkAuthByToken(token: string, opts?: any) {
+		const hash = token.split(' ')[1]
+		const payload = jwt.verify(hash, signingKey)
+		if (typeof payload === 'string') {
+			logger.error(payload)
+			return null
+		}
+		const user = await User.findByPk(payload.id, { include: { all: true }, ...opts })
+		if (user === null) {
+			logger.error('Пользователь не найден')
+		}
+		return user
+	}
+	static async login(payload: LoginInput) {
+		const user = await User.findOne({ where: { phone: payload.phone }, include: { all: true } })
+		if (!user) {
+			return new Error('Пользователь не найден')
+		}
+		const isValid = await compare(payload.password, user.password)
+		if (!isValid) {
+			return new Error('Неверный пароль')
+		}
+		const token = jwt.sign({ id: user.id }, signingKey, {
+			subject: payload.phone,
+			expiresIn: '1d',
+		})
+		return { token, user }
+	}
+	static async register(payload: RegisterUserInput) {
+		const user = await User.findOne({ where: { phone: payload.phone } })
+		if (user) {
+			return new Error('Пользователь с таким номером телефона уже зарегистрирован')
+		}
+		const newUser = await User.create({
+			name: payload.name,
+			phone: payload.phone,
+			password: payload.password,
+		})
+		return newUser
+	}
+	static async createDefaults() {
+		const users = [
+			{
+				phone: '123',
+				name: 'admin',
+				password: '123', //'$2b$10$oeG6fHl5I/oPnnTBEYPKEuEKp/Cr3MUlTRIIqLsf4Dbg3p6ZS.8iW', // 123
+				roles: [{ name: 'admin' }, { name: 'manager' }, { name: 'driver' }],
+			},
+			{
+				phone: '1234',
+				name: 'manager',
+				password: '1234', //'$2b$10$oeG6fHl5I/oPnnTBEYPKEuEKp/Cr3MUlTRIIqLsf4Dbg3p6ZS.8iW', // 123
+				roles: [{ name: 'manager' }, { name: 'driver' }],
+			},
+			{
+				phone: '12345',
+				name: 'driver',
+				password: '12345', //'$2b$10$oeG6fHl5I/oPnnTBEYPKEuEKp/Cr3MUlTRIIqLsf4Dbg3p6ZS.8iW', // 123
+				roles: [{ name: 'driver' }],
+			},
+		]
+		for (const user of users) {
+			const roles = []
+			for (const role of user.roles) {
+				const [currentRole] = await Role.findOrCreate({ where: { name: role.name } })
+				roles.push(currentRole)
+			}
+			const [newUser] = await User.findOrCreate({
+				where: { phone: user.phone },
+				defaults: user,
+			})
+			newUser.setRoles(roles)
+		}
+	}
+}
+
+User.init(
+	{
+		id: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+			primaryKey: true,
+			autoIncrement: true,
+			unique: true,
+		},
+		name: {
+			type: DataTypes.STRING(255),
+			allowNull: false,
+		},
+		nickname: {
+			type: DataTypes.STRING(255),
+			allowNull: true,
+		},
+		phone: {
+			type: DataTypes.STRING(25),
+			allowNull: false,
+			unique: true,
+			set(value: string) {
+				let phone = value
+				// Удаляем все не числовые символы
+				phone = value.replace(/\D/g, '')
+
+				// Если начинается с 8, заменяем на +7
+				if (phone.startsWith('8')) {
+					phone = '+7' + value.slice(1)
+				}
+
+				// Если начинается с 9, добавляем +7
+				if (phone.startsWith('9') || phone.startsWith('384')) {
+					phone = '+7' + value
+				}
+				this.setDataValue('phone', phone)
+			},
+		},
+		password: {
+			type: DataTypes.STRING(255),
+			allowNull: false,
+		},
+		comment: {
+			type: DataTypes.TEXT('long'),
+			allowNull: true,
+		},
+	},
+	{
+		tableName: 'users',
+		modelName: 'User',
+		sequelize,
+		paranoid: true,
+	}
+)
+User.beforeCreate(async (user) => {
+	const userExists = await User.findOne({ where: { phone: user.phone } })
+	if (userExists) {
+		throw new Error('Пользователь с таким номером телефона уже зарегистрирован')
+	}
+	const password = await hash(user.password, 10)
+	user.password = password
+})
+User.belongsToMany(Role, { through: 'UserRoles', as: 'roles' })
+Role.belongsToMany(User, { through: 'UserRoles', as: 'users' })
+User.belongsToMany(EquipmentType, {
+	through: 'UserEquipmentTypes',
+	as: 'equipmentTypes',
+})
+EquipmentType.belongsToMany(User, {
+	through: 'UserEquipmentTypes',
+	as: 'users',
+})
+
+export interface IUser extends IUserInput {
+	id: number
+}
+export interface IUserInput extends LoginInput {
+	name: string
+	nickname?: string
+	role: string
+	comment?: string
+}
+
+export interface RegisterUserInput extends LoginInput {
+	name: string
+}
+export interface UserIdInput {
+	input: {
+		userId: number
+	}
+}
+
+export interface LoginInput {
+	phone: string
+	password: string
+}
+export interface IUserFilter {
+	input: IFilter
+}
+interface IFilter extends Partial<IUser> {
+	limit?: number
+	offset?: number
+}
 
 // class User extends Model implements User {
 // 	constructor(
@@ -263,207 +459,3 @@ const signingKey = process.env.JWT_SECRET || 'secret'
 // 	}
 // }
 // export default User
-export class User extends Model {
-	declare id: number
-	declare name: string
-	declare nickname: string | null
-	declare phone: string
-	declare password: string
-	declare comment: string | null
-	static async checkAuthByToken(token: string, opts?: any) {
-		const hash = token.split(' ')[1]
-		const payload = jwt.verify(hash, signingKey)
-		if (typeof payload === 'string') {
-			logger.error(payload)
-			return null
-		}
-		const user = await User.findByPk(payload.id, opts)
-		if (user === null) {
-			logger.error('Пользователь не найден')
-		}
-		return user
-	}
-	static async login(payload: LoginInput) {
-		const user = await User.findOne({ where: { phone: payload.phone }, include: { all: true } })
-		if (!user) {
-			return new Error('Пользователь не найден')
-		}
-		const isValid = await compare(payload.password, user.password)
-		if (!isValid) {
-			return new Error('Неверный пароль')
-		}
-		const token = jwt.sign({ id: user.id }, signingKey, {
-			subject: payload.phone,
-			expiresIn: '1d',
-		})
-		return token
-	}
-}
-
-User.init(
-	{
-		id: {
-			type: DataTypes.INTEGER,
-			allowNull: false,
-			primaryKey: true,
-			autoIncrement: true,
-		},
-		name: {
-			type: DataTypes.STRING(255),
-			allowNull: false,
-		},
-		nickname: {
-			type: DataTypes.STRING(255),
-			allowNull: true,
-		},
-		phone: {
-			type: DataTypes.STRING(25),
-			allowNull: false,
-		},
-		password: {
-			type: DataTypes.STRING(255),
-			allowNull: false,
-			set(value: string) {
-				// Storing passwords in plaintext in the database is terrible.
-				// Hashing the value with an appropriate cryptographic hash function is better.
-				this.setDataValue('password', hash(value, 10))
-			},
-		},
-		// role: {
-		// 	type: DataTypes.STRING(30),
-		// 	allowNull: false,
-		// },
-		// isActive: {
-		// 	type: DataTypes.BOOLEAN,
-		// 	allowNull: false,
-		// },
-		comment: {
-			type: DataTypes.STRING(255),
-			allowNull: true,
-		},
-		// createdAt: {
-		// 	type: DataTypes.DATE,
-		// 	allowNull: false,
-		// },
-		// updatedAt: {
-		// 	type: DataTypes.DATE,
-		// 	allowNull: false,
-		// },
-		// deletedAt: {
-		// 	type: DataTypes.DATE,
-		// 	allowNull: true,
-		// },
-	},
-	{
-		tableName: 'users',
-		modelName: 'User',
-		sequelize,
-		paranoid: true,
-	}
-)
-// class UserRoles extends Model {}
-// UserRoles.init(
-// 	{
-// 		UserId: {
-// 			type: DataTypes.INTEGER,
-// 			references: {
-// 				model: User,
-// 				key: 'id',
-// 			},
-// 		},
-// 		RoleId: {
-// 			type: DataTypes.INTEGER,
-// 			references: {
-// 				model: Role,
-// 				key: 'id',
-// 			},
-// 		},
-// 	},
-// 	{
-// 		modelName: 'userRoles',
-// 		sequelize,
-// 		paranoid: true,
-// 	}
-// )
-// class UserEquipmentTypes extends Model {}
-// UserEquipmentTypes.init(
-// 	{
-// 		UserId: {
-// 			type: DataTypes.INTEGER,
-// 			references: {
-// 				model: User,
-// 				key: 'id',
-// 			},
-// 		},
-// 		EquipmentTypeId: {
-// 			type: DataTypes.INTEGER,
-// 			references: {
-// 				model: EquipmentType,
-// 				key: 'id',
-// 			},
-// 		},
-// 	},
-// 	{
-// 		modelName: 'userEquipmentTypes',
-// 		sequelize,
-// 		paranoid: true,
-// 	}
-// )
-Role.belongsToMany(User, { through: 'UserRoles' })
-User.belongsToMany(Role, { through: 'UserRoles' })
-User.belongsToMany(EquipmentType, {
-	through: 'UserEquipmentTypes',
-	// as: 'equipmentTypes',
-	// sourceKey: 'id',
-	// foreignKey: 'EquipmentTypeId',
-	// foreignKeyConstraint: false,
-	// targetKey: 'id',
-})
-EquipmentType.belongsToMany(User, {
-	through: 'UserEquipmentTypes',
-	// as: 'users',
-	// sourceKey: 'id',
-	// foreignKey: 'EquipmentTypeId',
-	// foreignKeyConstraint: false,
-	// targetKey: 'id',
-})
-
-export interface IUser extends IUserInput {
-	id: number
-}
-export interface IUserInput extends LoginInput {
-	name: string
-	nickname?: string
-	role: string
-	comment?: string
-}
-
-// interface UserDbInput {
-// 	name?: string
-// 	nickname?: string
-// 	phone?: string
-// 	isActive?: boolean
-// 	comment?: string
-// 	password?: string
-// 	role: string
-// }
-// export interface UpdateUserInput extends Partial<IUserInput> {
-// 	id: number
-// }
-export interface UserIdInput {
-	input: {
-		userId: number
-	}
-}
-
-export interface LoginInput {
-	phone: string
-	password: string
-}
-export interface IUserFilter {
-	input: IFilter
-}
-interface IFilter extends Partial<IUser> {
-	limit?: number
-	offset?: number
-}

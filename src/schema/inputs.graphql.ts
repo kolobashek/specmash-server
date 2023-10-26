@@ -11,7 +11,7 @@ const typeDefs = `#graphql
     name: String!
     phone: String!
     password: String!
-    role: String
+    roles: [Int]
     nickname: String
     comment: String
   }
@@ -20,7 +20,7 @@ const typeDefs = `#graphql
     name: String!
     phone: String!
     password: String
-    role: String
+    roles: [Int]
     nickname: String
     isActive: Boolean
     comment: String
@@ -100,7 +100,7 @@ const typeDefs = `#graphql
   }
   input UsersFilterInput {
     name: String
-	  role: String
+	  roles: [Int]
 	  isActive: Boolean
   }
 `

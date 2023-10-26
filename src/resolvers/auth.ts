@@ -1,6 +1,7 @@
 import { GraphQLError } from 'graphql'
 import { resolverPermissions } from '.'
 import { User, IUserInput, LoginInput, UserIdInput } from '../models/user'
+import logger from '../config/logger'
 
 export const AuthResolver = {
 	Query: {
@@ -28,8 +29,9 @@ export const AuthResolver = {
 			}
 		},
 		login: async (parent: any, { phone, password }: LoginInput, ctx: any) => {
-			const token = await User.login({ phone, password })
-			if (token instanceof Error) {
+			const response = await User.login({ phone, password })
+			if (response instanceof Error) {
+				logger.error(response.message)
 				return new GraphQLError('Неверный телефон или пароль')
 			}
 			// Set the cookie on the response
@@ -39,10 +41,10 @@ export const AuthResolver = {
 				secure: true,
 				domain: 'specmash.su',
 				expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 24 hours
-				value: token,
+				value: response.token,
 				httpOnly: true,
 			})
-			return { token }
+			return response
 		},
 	},
 }

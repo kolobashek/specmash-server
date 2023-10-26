@@ -4,8 +4,58 @@ import { sequelize } from '../db'
 export class EquipmentType extends Model {
 	declare id: number
 	declare name: string
-	declare drivingLicenseCategory: string
+	declare drivingLicenseCategory: string | null
 	declare comment: string | null
+	static async createDefaults() {
+		const defaultEquipmentTypes = [
+			{
+				name: 'Фронтальный погрузчик бол.',
+				drivingLicenseCategory: 'Dt',
+			},
+			{
+				name: 'Фронтальный погрузчик мал.',
+				drivingLicenseCategory: 'Ct',
+			},
+			{
+				name: 'Самосвал',
+				drivingLicenseCategory: 'C',
+			},
+			{
+				name: 'Бульдозер',
+				drivingLicenseCategory: 'Et',
+			},
+			{
+				name: 'Экскаватор гусеничный',
+				drivingLicenseCategory: 'Et',
+			},
+			{
+				name: 'Экскаватор колесный',
+				drivingLicenseCategory: 'Dt',
+			},
+			{
+				name: 'Трактор',
+				drivingLicenseCategory: 'Ct',
+			},
+			{
+				name: 'Самопогрузчик (воровайка)',
+				drivingLicenseCategory: 'C',
+			},
+			{
+				name: 'Легковой автомобиль',
+				drivingLicenseCategory: 'B',
+			},
+			{
+				name: 'Микроавтобус',
+				drivingLicenseCategory: 'D',
+			},
+		]
+		for (const eqType of defaultEquipmentTypes) {
+			const [newUser] = await EquipmentType.findOrCreate({
+				where: { name: eqType.name },
+				defaults: eqType,
+			})
+		}
+	}
 	// constructor(id?: number, name?: string) {
 	// 	super()
 	// 	this.id = id || 0
@@ -69,6 +119,7 @@ EquipmentType.init(
 		name: {
 			type: DataTypes.STRING(255),
 			allowNull: false,
+			unique: true,
 		},
 		drivingLicenseCategory: {
 			type: DataTypes.STRING(10),

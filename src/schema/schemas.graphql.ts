@@ -5,7 +5,7 @@ const typeDefs = `#graphql
     nickname: String
     password: String
     phone: String!
-    role: Role
+    roles: [Role]
     isActive: Boolean!
     comment: String
   }
@@ -14,12 +14,12 @@ const typeDefs = `#graphql
   }
   type LoginPayload {
     token: String!
+    user: User!
   }
-  enum Role {
-    admin
-    manager
-    driver
-    UNDEFINED
+  type Role {
+    id: ID!
+    name: String!
+    comment: String
   }
   type Auth {
     token: String!

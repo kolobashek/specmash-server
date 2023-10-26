@@ -1,7 +1,6 @@
 const typeDefs = `#graphql
   type Query {
     users(input: UsersFilterInput): [User]!
-    # user(id: ID!): User @auth(role: manager)
     me: User
     user(id:ID!): User
     isActive(userId: ID!): Boolean

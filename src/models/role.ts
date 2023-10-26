@@ -6,19 +6,6 @@ export class Role extends Model {
 	declare id: number
 	declare name: string
 	declare comment: string | null
-	static async createDefaultRoles() {
-		await this.create({
-			name: 'admin',
-		})
-
-		await this.create({
-			name: 'manager',
-		})
-
-		await this.create({
-			name: 'driver',
-		})
-	}
 	// constructor(name: string, id: number) {
 	// 	super()
 	// 	this.name = name
@@ -68,9 +55,11 @@ Role.init(
 			allowNull: false,
 			primaryKey: true,
 			autoIncrement: true,
+			unique: true,
 		},
 		name: {
 			type: DataTypes.STRING(255),
+			unique: true,
 			allowNull: false,
 		},
 		comment: {
