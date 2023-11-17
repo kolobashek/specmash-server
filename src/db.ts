@@ -20,11 +20,11 @@ export const sequelize: Sequelize = new Sequelize(
 		port: Number(DB_PORT),
 		dialect: 'mariadb',
 		timezone: '+07:00',
-		// logging: (...msg) => logger.info(msg),
-		logging: (...msg) => {
-			logger.info(msg)
-			console.log(msg)
-		},
+		logging: (...msg) => logger.info(msg),
+		// logging: (...msg) => {
+		// 	logger.info(msg)
+		// 	console.log(msg)
+		// },
 	}
 )
 

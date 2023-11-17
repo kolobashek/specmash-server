@@ -1,5 +1,10 @@
 import { Object } from './object'
-import { DataTypes, Model } from 'sequelize'
+import {
+	BelongsToManyGetAssociationsMixin,
+	BelongsToManySetAssociationsMixin,
+	DataTypes,
+	Model,
+} from 'sequelize'
 import { sequelize } from '../db'
 
 export class ContrAgent extends Model {
@@ -8,6 +13,9 @@ export class ContrAgent extends Model {
 	declare address: string | null
 	declare comment: string | null
 	declare contacts: string | null
+	declare getObjects: BelongsToManyGetAssociationsMixin<Object>
+	declare setObjects: BelongsToManySetAssociationsMixin<Object, number>
+	declare addObject: BelongsToManySetAssociationsMixin<Object, number>
 
 	// static get tableName() {
 	// 	return 'contrAgents'
@@ -98,14 +106,14 @@ ContrAgent.init(
 			type: DataTypes.STRING,
 			allowNull: true,
 		},
-		objects: {
-			type: DataTypes.INTEGER,
-			allowNull: true,
-			references: {
-				model: Object,
-				key: 'id',
-			},
-		},
+		// objects: {
+		// 	type: DataTypes.INTEGER,
+		// 	allowNull: true,
+		// 	references: {
+		// 		model: Object,
+		// 		key: 'id',
+		// 	},
+		// },
 	},
 	{
 		modelName: 'contrAgents',
@@ -113,6 +121,14 @@ ContrAgent.init(
 		paranoid: true,
 	}
 )
+ContrAgent.beforeCreate(async (contrAgent) => {
+	const contrAgentExists = await ContrAgent.findOne({ where: { name: contrAgent.name } })
+	if (contrAgentExists) {
+		throw new Error('Контрагент с таким названием уже зарегистрирован')
+	}
+})
+ContrAgent.belongsToMany(Object, { through: 'ContrAgentObject', as: 'objects' })
+Object.belongsToMany(ContrAgent, { through: 'ContrAgentObject', as: 'contrAgents' })
 
 export interface ContrAgentAttributes extends ContrAgentAttributesInput {
 	id: number

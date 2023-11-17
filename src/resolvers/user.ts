@@ -2,16 +2,28 @@ import { GraphQLError } from 'graphql'
 import { resolverPermissions } from '.'
 import { User, LoginInput, UserIdInput, IUser } from '../models/user'
 import { Role } from '../models/role'
+import { Op } from 'sequelize'
 
 export const UserResolver = {
 	Query: {
-		users: async (parent: any, args: any, ctx: any) => {
+		users: async (parent: any, { input }: any, ctx: any) => {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
-				const users = await User.findAll(args)
+				// console.log('---===--->')
+				// console.log(input)
+				// console.log('<---===---')
+				const users = await User.findAll({
+					...input,
+					include: [
+						{
+							model: Role,
+							as: 'roles',
+						},
+					],
+				})
 				return users
 			}
-			return []
+			return new GraphQLError('Не достаточно прав доступа')
 		},
 
 		user: async (parent: any, { id }: { id: number }, ctx: any) => {

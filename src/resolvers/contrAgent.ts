@@ -22,11 +22,18 @@ export const ContrAgentResolver = {
 			{ input }: { input: ContrAgentAttributesInput },
 			ctx: any
 		) => {
+			// console.log('===createCAresolver', ctx)
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
-				const user = await ContrAgent.create({ ...input })
-				console.log(user)
-				return user
+				// if (!input.objects?.length)
+				// console.log('---===--->')
+				// console.log(input)
+				// console.log('<---===---')
+				const contrAgent = await ContrAgent.create({ ...input })
+				// console.log('---===--->')
+				// console.log(contrAgent)
+				// console.log('<---===---')
+				return contrAgent
 			}
 			return new GraphQLError('Недостаточно прав')
 		},

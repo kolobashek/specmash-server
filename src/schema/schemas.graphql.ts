@@ -17,7 +17,7 @@ const typeDefs = `#graphql
     user: User!
   }
   type Role {
-    id: ID!
+    id: Int!
     name: String!
     comment: String
   }

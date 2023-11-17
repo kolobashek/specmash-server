@@ -39,12 +39,25 @@ export class User extends Model<InferAttributes<User>, InferCreationAttributes<U
 			logger.error(payload)
 			return null
 		}
+		// console.log('checkAuthByToken ---', payload)
 		const user = await User.findByPk(payload.id, { include: { all: true }, ...opts })
+		// console.log('checkAuthByToken ---', user)
 		if (user === null) {
 			logger.error('Пользователь не найден')
 		}
 		return user
 	}
+	/**
+	 * Входит в систему под пользователем, проверяя его номер телефона и пароль.
+	 *
+	 * Принимает объект LoginInput, содержащий телефон и пароль.
+	 * Находит пользователя по номеру телефона.
+	 * Сравнивает предоставленный пароль с хешированным паролем в базе данных.
+	 * Если данные верны, генерирует JWT-токен, содержащий идентификатор пользователя.
+	 * Возвращает объект, содержащий новый токен и объект пользователя.
+	 * Если вход не удался, возвращает ошибку.
+	 */
+
 	static async login(payload: LoginInput) {
 		const user = await User.findOne({ where: { phone: payload.phone }, include: { all: true } })
 		if (!user) {
