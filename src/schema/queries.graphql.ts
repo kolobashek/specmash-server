@@ -14,11 +14,11 @@ const typeDefs = `#graphql
     equipment(id: ID!): Equipment
     equipmentByType(typeId: ID!): [Equipment]!
 
-    objects: [Object]!
-    object(id: ID!): Object
+    workPlaces: [WorkPlace]!
+    workPlace(id: ID!): WorkPlace
 
-    contrAgents: [ContrAgent]!
-    contrAgent(id: ID!): ContrAgent
+    partners: [Partner]!
+    partner(id: ID!): Partner
 
     travelLogs(dateStart: String, dateEnd: String, user: [String], equipment: [String], comments: String): [TravelLog]
     travelLog(id: ID!): TravelLog!

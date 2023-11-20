@@ -99,7 +99,7 @@ export class EquipmentType extends Model {
 	// }
 	// static get jsonSchema() {
 	// 	return {
-	// 		type: 'object',
+	// 		type: 'workPlace',
 	// 		properties: {
 	// 			id: { type: 'integer' },
 	// 			name: { type: 'string' },

@@ -28,8 +28,8 @@ const typeDefs = `#graphql
 
   input CreateTravelLogInput {
     driver: Int
-    object: Int
-    contrAgent: Int
+    workPlace: Int
+    partner: Int
     equipment: Int
     date: String!
     shiftNumber: Int!
@@ -38,18 +38,18 @@ const typeDefs = `#graphql
     comments: String
   }
 
-  input CreateContrAgentInput {
+  input CreatePartnerInput {
     name: String!
     contacts: String
     address: String
     comments: String
-    objects: [Int]
+    workPlaces: [Int]
   }
 
   input UpdateTravelLogInput {
     id: Int!
     driverId: Int
-    objectId: Int
+    workPlaceId: Int
     equipmentId: Int
     date: String!
     shiftNumber: Int!
@@ -58,27 +58,27 @@ const typeDefs = `#graphql
     comments: String
   }
   
-  input UpdateContrAgentInput {
+  input UpdatePartnerInput {
     id: Int!
     name: String!
     contacts: String
     address: String
     comments: String
-    objects: [Int]
+    workPlaces: [Int]
   }
 
-  input CreateObjectInput {
+  input CreateWorkPlaceInput {
     name: String!
     contacts: String
     address: String
-    contrAgents: [Int]
+    partners: [Int]
   }
-  input UpdateObjectInput {
+  input UpdateWorkPlaceInput {
     id: Int!
     name: String!
     contacts: String
     address: String
-    contrAgents: [Int]
+    partners: [Int]
   }
 
   input CreateEquipmentInput {

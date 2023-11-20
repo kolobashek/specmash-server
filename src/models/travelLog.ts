@@ -7,13 +7,13 @@ import { Role } from './role'
 import logger from '../config/logger'
 import { User } from './user'
 import { Equipment } from './equipment'
-import { Object } from './object'
-import { ContrAgent } from './contrAgent'
+import { WorkPlace } from './workPlace'
+import { Partner } from './partner'
 
 export class TravelLog extends Model {
 	declare id: number
 	declare driver: number
-	declare object: number
+	declare workPlace: number
 	declare equipment: number
 	declare date: Date
 	declare shiftNumber: number
@@ -23,7 +23,7 @@ export class TravelLog extends Model {
 	// // constructor(
 	// // 	id?: number,
 	// // 	driver?: number,
-	// // 	object?: number,
+	// // 	workPlace?: number,
 	// // 	equipment?: number,
 	// // 	date?: string,
 	// // 	shiftNumber?: number,
@@ -34,7 +34,7 @@ export class TravelLog extends Model {
 	// // 	super()
 	// // 	this.id = id || 0
 	// // 	this.driver = driver || 0
-	// // 	this.object = object || 0
+	// // 	this.workPlace = workPlace || 0
 	// // 	this.equipment = equipment || 0
 	// // 	this.date = date || ''
 	// // 	this.shiftNumber = shiftNumber || 1
@@ -49,9 +49,9 @@ export class TravelLog extends Model {
 	// 	try {
 	// 		return await this.query()
 	// 			.withGraphFetched('driver')
-	// 			.withGraphFetched('object')
+	// 			.withGraphFetched('workPlace')
 	// 			.withGraphFetched('equipment')
-	// 			.withGraphFetched('contrAgents')
+	// 			.withGraphFetched('partners')
 	// 	} catch (error: any) {
 	// 		logger.error(error)
 	// 		return new Error(error)
@@ -62,9 +62,9 @@ export class TravelLog extends Model {
 	// 	try {
 	// 		const query = this.query()
 	// 			.withGraphFetched('driver')
-	// 			.withGraphFetched('object')
+	// 			.withGraphFetched('workPlace')
 	// 			.withGraphFetched('equipment')
-	// 			.withGraphFetched('contrAgents')
+	// 			.withGraphFetched('partners')
 	// 			.limit(filter.limit || 50)
 	// 			.offset(offset)
 	// 		if (filter.dateStart) {
@@ -82,8 +82,8 @@ export class TravelLog extends Model {
 	// 		if (filter.drivers) {
 	// 			query.whereIn('driver', filter.drivers)
 	// 		}
-	// 		if (filter.objects) {
-	// 			query.whereIn('object', filter.objects)
+	// 		if (filter.workPlaces) {
+	// 			query.whereIn('workPlace', filter.workPlaces)
 	// 		}
 	// 		if (filter.shiftNumber) {
 	// 			query.where('shiftNumber', filter.shiftNumber)
@@ -91,8 +91,8 @@ export class TravelLog extends Model {
 	// 		if (filter.comments) {
 	// 			query.where('comments', 'like', `%${filter.comments}%`)
 	// 		}
-	// 		if (filter.contrAgents) {
-	// 			query.whereIn('contrAgent', filter.contrAgents)
+	// 		if (filter.partners) {
+	// 			query.whereIn('partner', filter.partners)
 	// 		}
 	// 		if (filter.deleted) {
 	// 			query.whereNotNull('deletedAt')
@@ -116,7 +116,7 @@ export class TravelLog extends Model {
 	// }
 	// static async create(data: CreateTravelLogInput) {
 	// 	try {
-	// 		const { date, shiftNumber, equipment, object, contrAgent, driver, ...travelLogData } = data
+	// 		const { date, shiftNumber, equipment, workPlace, partner, driver, ...travelLogData } = data
 	// 		// Добавление умолчаний
 	// 		if (!date || !shiftNumber) {
 	// 			return new Error('Введите дату и смену')
@@ -132,9 +132,9 @@ export class TravelLog extends Model {
 	// 				id: isTravelLogExists.id,
 	// 				date,
 	// 				shiftNumber,
-	// 				object,
+	// 				workPlace,
 	// 				equipment,
-	// 				contrAgent,
+	// 				partner,
 	// 				driver,
 	// 				...travelLogData,
 	// 			})
@@ -149,9 +149,9 @@ export class TravelLog extends Model {
 	// 		// 	{
 	// 		// 		shiftNumber,
 	// 		// 		date,
-	// 		// 		object,
+	// 		// 		workPlace,
 	// 		// 		equipment,
-	// 		// 		contrAgent,
+	// 		// 		partner,
 	// 		// 		driver,
 	// 		// 		...travelLogData,
 	// 		// 	},
@@ -163,14 +163,14 @@ export class TravelLog extends Model {
 	// 		// // 	return newTraveLog
 	// 		// // }
 	// 		// // console.log('travelLogResponse', newTraveLog)
-	// 		// // if (contrAgentId) {
-	// 		// // 	await newTraveLog.$relatedQuery('contrAgents').relate(contrAgentId)
+	// 		// // if (partnerId) {
+	// 		// // 	await newTraveLog.$relatedQuery('partners').relate(partnerId)
 	// 		// // }
 	// 		// // if (driverId) {
 	// 		// // 	await newTraveLog.$relatedQuery('users').relate(driverId)
 	// 		// // }
-	// 		// // if (objectId) {
-	// 		// // 	await newTraveLog.$relatedQuery('objects').relate(objectId)
+	// 		// // if (workPlaceId) {
+	// 		// // 	await newTraveLog.$relatedQuery('workPlaces').relate(workPlaceId)
 	// 		// // }
 	// 		// // if (equipment) {
 	// 		// // 	await newTraveLog.$relatedQuery('equipment').relate(equipment)
@@ -208,7 +208,7 @@ export class TravelLog extends Model {
 	// }
 	// static get jsonSchema() {
 	// 	return {
-	// 		type: 'object',
+	// 		type: 'workPlace',
 	// 		required: ['date', 'shiftNumber', 'equipmentId'],
 	// 		properties: {
 	// 			id: { type: 'integer' },
@@ -216,8 +216,8 @@ export class TravelLog extends Model {
 	// 			shiftNumber: { type: 'integer' },
 	// 			equipmentId: { type: ['integer'] },
 	// 			driverId: { type: ['integer', 'null'] },
-	// 			objectId: { type: ['integer', 'null'] },
-	// 			contrAgentId: { type: ['integer', 'null'] },
+	// 			workPlaceId: { type: ['integer', 'null'] },
+	// 			partnerId: { type: ['integer', 'null'] },
 	// 			hoursWorked: { type: 'number' },
 	// 			comments: { type: 'string', maxLength: 255 },
 	// 		},
@@ -244,20 +244,20 @@ export class TravelLog extends Model {
 	// 				to: 'equipment.id',
 	// 			},
 	// 		},
-	// 		object: {
+	// 		workPlace: {
 	// 			relation: Model.BelongsToOneRelation,
-	// 			modelClass: Object,
+	// 			modelClass: WorkPlace,
 	// 			join: {
-	// 				from: 'travelLogs.objectId',
-	// 				to: 'objects.id',
+	// 				from: 'travelLogs.workPlaceId',
+	// 				to: 'workPlaces.id',
 	// 			},
 	// 		},
-	// 		contrAgents: {
+	// 		partners: {
 	// 			relation: Model.BelongsToOneRelation,
-	// 			modelClass: ContrAgent,
+	// 			modelClass: Partner,
 	// 			join: {
-	// 				from: 'objects.contrAgentId',
-	// 				to: 'contrAgents.id',
+	// 				from: 'workPlaces.partnerId',
+	// 				to: 'partners.id',
 	// 			},
 	// 		},
 	// 	}
@@ -296,11 +296,11 @@ TravelLog.init(
 			type: DataTypes.INTEGER,
 			allowNull: true,
 		},
-		objectId: {
+		workPlaceId: {
 			type: DataTypes.INTEGER,
 			allowNull: true,
 		},
-		contrAgentId: {
+		partnerId: {
 			type: DataTypes.INTEGER,
 			allowNull: true,
 		},
@@ -332,9 +332,9 @@ interface UpdateTravelLogInput extends CreateTravelLogInput {
 }
 export interface CreateTravelLogInput {
 	driver?: User
-	object?: Object
+	workPlace?: WorkPlace
 	equipment: Equipment
-	contrAgent?: ContrAgent
+	partner?: Partner
 	date: string
 	shiftNumber: number
 	hoursWorked?: number
@@ -349,9 +349,9 @@ export interface CreateTravelLogPayload {
 	input: CreateTravelLogInput
 	// input: {
 	// 	driver?: { id: number; name: string }
-	// 	object?: { id: number; name: string }
+	// 	workPlace?: { id: number; name: string }
 	// 	equipment: { id: number; name: string }
-	// 	contrAgent?: { id: number; name: string }
+	// 	partner?: { id: number; name: string }
 	// 	date: string
 	// 	shiftNumber: number
 	// 	hoursWorked?: number
@@ -369,9 +369,9 @@ interface FilterTravelLogInput {
 	shiftNumber?: number
 	equipments?: number[]
 	drivers?: number[]
-	objects?: number[]
+	workPlaces?: number[]
 	comments?: string
-	contrAgents?: number[]
+	partners?: number[]
 	deleted?: boolean
 	hoursWorkedStart?: number
 	hoursWorkedEnd?: number

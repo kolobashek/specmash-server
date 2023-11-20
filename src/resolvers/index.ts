@@ -1,9 +1,9 @@
 import { AuthResolver } from './auth'
 import { TravelLogResolver } from './travelLogs'
-import { ObjectResolver } from './object'
+import { WorkPlaceResolver } from './workPlace'
 import { UserResolver } from './user'
 import { EquipmentResolver } from './equipment'
-import { ContrAgentResolver } from './contrAgent'
+import { PartnerResolver } from './partner'
 import logger from '../config/logger'
 import { User } from '../models/user'
 import { Role } from '../models/role'
@@ -24,18 +24,18 @@ export const resolverPermissions = async (ctx: any, ...resolvedRoles: string[]) 
 
 const resolvers = {
 	Query: {
-		...ContrAgentResolver.Query,
+		...PartnerResolver.Query,
 		...EquipmentResolver.Query,
 		...UserResolver.Query,
-		...ObjectResolver.Query,
+		...WorkPlaceResolver.Query,
 		...TravelLogResolver.Query,
 		...AuthResolver.Query,
 	},
 	Mutation: {
-		...ContrAgentResolver.Mutation,
+		...PartnerResolver.Mutation,
 		...EquipmentResolver.Mutation,
 		...UserResolver.Mutation,
-		...ObjectResolver.Mutation,
+		...WorkPlaceResolver.Mutation,
 		...TravelLogResolver.Mutation,
 		...AuthResolver.Mutation,
 	},

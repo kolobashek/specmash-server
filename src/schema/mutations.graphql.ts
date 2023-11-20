@@ -11,12 +11,12 @@ const typeDefs = `#graphql
     #Machines
     createEquipment(input: CreateEquipmentInput): Equipment
     updateEquipment(input: UpdateEquipmentInput!): Equipment
-    #ContrAgents
-    createContrAgent(input: CreateContrAgentInput!): ContrAgent
-    updateContrAgent(input: UpdateContrAgentInput!): ContrAgent
-    #Objects
-    createObject(input: CreateObjectInput!): Object
-    updateObject(input: UpdateObjectInput!): Object
+    #Partners
+    createPartner(input: CreatePartnerInput!): Partner
+    updatePartner(input: UpdatePartnerInput!): Partner
+    #WorkPlaces
+    createWorkPlace(input: CreateWorkPlaceInput!): WorkPlace
+    updateWorkPlace(input: UpdateWorkPlaceInput!): WorkPlace
   }
 `
 export default typeDefs

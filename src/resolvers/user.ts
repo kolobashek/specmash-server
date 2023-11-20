@@ -29,7 +29,14 @@ export const UserResolver = {
 		user: async (parent: any, { id }: { id: number }, ctx: any) => {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
-				const user = await User.findByPk(id)
+				const user = await User.findByPk(id, {
+					include: [
+						{
+							model: Role,
+							as: 'roles',
+						},
+					],
+				})
 				return user
 			}
 			return new GraphQLError('Не достаточно прав доступа')

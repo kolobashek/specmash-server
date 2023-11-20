@@ -1,4 +1,4 @@
-// import { Model } from 'objection'
+// import { Model } from 'workPlaceion'
 import { hash, compare } from 'bcrypt'
 import jwt from 'jsonwebtoken'
 // import { knex } from '../db'
@@ -442,7 +442,7 @@ interface IFilter extends Partial<IUser> {
 
 // 	static get jsonSchema() {
 // 		return {
-// 			type: 'object',
+// 			type: 'workPlace',
 // 			required: ['name', 'phone', 'role'],
 
 // 			properties: {

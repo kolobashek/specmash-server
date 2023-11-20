@@ -16,8 +16,8 @@ export const TravelLogResolver = {
 					...input,
 					// driverId: input.driver?.id,
 					// equipmentId: input.equipment.id,
-					// objectId: input.object?.id,
-					// contrAgentId: input.contrAgent?.id,
+					// workPlaceId: input.workPlace?.id,
+					// partnerId: input.partner?.id,
 				}
 				const travelLog = await TravelLog.create(payload)
 				return travelLog
@@ -33,8 +33,8 @@ export const TravelLogResolver = {
 						...input,
 						// driverId: input.driver?.id,
 						// equipmentId: input.equipment.id,
-						// objectId: input.object?.id,
-						// contrAgentId: input.contrAgent?.id,
+						// workPlaceId: input.workPlace?.id,
+						// partnerId: input.partner?.id,
 					}
 					const travelLog = await updatedTravelLog.update(payload)
 					return travelLog

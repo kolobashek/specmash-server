@@ -1,7 +1,7 @@
 // Импорты
 // import Knex from 'knex'
 // import knexConfig from './config/knexfile'
-// import { Model } from 'objection'
+// import { Model } from 'workPlaceion'
 import logger from './config/logger.ts'
 import * as dotenv from 'dotenv'
 import { Sequelize } from 'sequelize'
@@ -185,13 +185,13 @@ export const sequelize: Sequelize = new Sequelize(
 // 			console.error(error)
 // 		}
 // 	}
-// 	// Проверяем наличие таблицы contrAgents
-// 	const checkContrAgents = async () => {
+// 	// Проверяем наличие таблицы partners
+// 	const checkPartners = async () => {
 // 		try {
-// 			const contrAgentsExists = await knex.schema.hasTable('contrAgents')
+// 			const partnersExists = await knex.schema.hasTable('partners')
 
-// 			if (!contrAgentsExists) {
-// 				await knex.schema.createTable('contrAgents', (table) => {
+// 			if (!partnersExists) {
+// 				await knex.schema.createTable('partners', (table) => {
 // 					table.increments('id').primary()
 // 					table.string('name', 255).notNullable()
 // 					table.string('contacts', 255)
@@ -204,13 +204,13 @@ export const sequelize: Sequelize = new Sequelize(
 // 			console.error(error)
 // 		}
 // 	}
-// 	// Проверяем наличие таблицы objects
-// 	const checkObjects = async () => {
+// 	// Проверяем наличие таблицы workPlaces
+// 	const checkWorkPlaces = async () => {
 // 		try {
-// 			const objectsExists = await knex.schema.hasTable('objects')
+// 			const workPlacesExists = await knex.schema.hasTable('workPlaces')
 
-// 			if (!objectsExists) {
-// 				await knex.schema.createTable('objects', (table) => {
+// 			if (!workPlacesExists) {
+// 				await knex.schema.createTable('workPlaces', (table) => {
 // 					table.increments('id').primary()
 // 					table.string('name', 255).notNullable()
 // 					table.string('contacts', 255)
@@ -222,13 +222,13 @@ export const sequelize: Sequelize = new Sequelize(
 // 			console.error(error)
 // 		}
 // 	}
-// 	const checkContrAgentsObjects = async () => {
-// 		const tableExists = await knex.schema.hasTable('contrAgentsObjects')
+// 	const checkPartnersWorkPlaces = async () => {
+// 		const tableExists = await knex.schema.hasTable('partnersWorkPlaces')
 
 // 		if (!tableExists) {
-// 			await knex.schema.createTable('contrAgentsObjects', (table) => {
-// 				table.integer('contrAgentId').unsigned().references('contrAgents.id')
-// 				table.integer('objectId').unsigned().references('objects.id')
+// 			await knex.schema.createTable('partnersWorkPlaces', (table) => {
+// 				table.integer('partnerId').unsigned().references('partners.id')
+// 				table.integer('workPlaceId').unsigned().references('workPlaces.id')
 // 			})
 // 		}
 // 	}
@@ -243,14 +243,14 @@ export const sequelize: Sequelize = new Sequelize(
 // 					table.date('date')
 // 					table.integer('shiftNumber')
 // 					table.integer('userId').unsigned()
-// 					table.integer('objectId').unsigned()
+// 					table.integer('workPlaceId').unsigned()
 // 					table.integer('equipmentId').unsigned()
 // 					table.integer('hoursWorked')
 // 					table.integer('hoursIdle')
 // 					table.date('deletedAt').defaultTo(null)
 // 					table.text('comments')
 // 					table.foreign('userId').references('users.id')
-// 					table.foreign('objectId').references('objects.id')
+// 					table.foreign('workPlaceId').references('workPlaces.id')
 // 					table.foreign('equipmentId').references('equipment.id')
 // 				})
 // 			}
@@ -265,9 +265,9 @@ export const sequelize: Sequelize = new Sequelize(
 // 		await checkUserEquipmentTypes()
 // 		await checkEquipmentTypes()
 // 		await checkEquipment()
-// 		await checkContrAgents()
-// 		await checkObjects()
-// 		await checkContrAgentsObjects()
+// 		await checkPartners()
+// 		await checkWorkPlaces()
+// 		await checkPartnersWorkPlaces()
 // 		await checkTravelLogs()
 
 // 		logger.info('Database initialized successfully')
