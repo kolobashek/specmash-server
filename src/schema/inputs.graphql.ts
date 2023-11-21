@@ -1,3 +1,4 @@
+import { Equipment } from './../models/equipment'
 const typeDefs = `#graphql
 
   input UserIdInput {
@@ -83,7 +84,8 @@ const typeDefs = `#graphql
 
   input CreateEquipmentInput {
     name: String!
-    type: String!
+    typeId: Int!
+    # type: EquipmentType!
     dimensions: String
     weight: Int
     licensePlate: String

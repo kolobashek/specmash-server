@@ -24,23 +24,23 @@ const yoga = createYoga({
 	},
 	plugins: [
 		useCookies(),
-		useGenericAuth({
-			mode: 'protect-granular',
-			async resolveUserFn(context: YogaInitialContext) {
-				let accessToken = (context.request.headers as any).authorization ?? null
-				if (accessToken === null) {
-					return null
-				}
-				const token = accessToken.split(' ')[1]
-				try {
-					const user = jwt.verify(token, signingKey)
-					// Добавляем данные пользователя в объект запроса
-					return user ?? null
-				} catch (error) {
-					return null
-				}
-			},
-		}),
+		// useGenericAuth({
+		// 	mode: 'protect-granular',
+		// 	async resolveUserFn(context: YogaInitialContext) {
+		// 		let accessToken = (context.request.headers as any).authorization ?? null
+		// 		if (accessToken === null) {
+		// 			return null
+		// 		}
+		// 		const token = accessToken.split(' ')[1]
+		// 		try {
+		// 			const user = jwt.verify(token, signingKey)
+		// 			// Добавляем данные пользователя в объект запроса
+		// 			return user ?? null
+		// 		} catch (error) {
+		// 			return null
+		// 		}
+		// 	},
+		// }),
 	],
 	// graphiql(request) {
 	//   if (request.headers.get('graphiql-enabled')) {
@@ -52,6 +52,9 @@ const yoga = createYoga({
 const server = http.createServer(yoga)
 
 export function startServer(port: number) {
+	server.prependListener('request', (req, res) => {
+		console.log(req.headers.authorization)
+	})
 	server.listen(port, () => {
 		console.info(`Server is running on http://localhost:${port}/graphql`)
 	})

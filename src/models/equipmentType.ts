@@ -1,11 +1,29 @@
-import { DataTypes, Model } from 'sequelize'
+import {
+	Association,
+	CreationOptional,
+	DataTypes,
+	HasManyGetAssociationsMixin,
+	InferAttributes,
+	InferCreationAttributes,
+	Model,
+} from 'sequelize'
 import { sequelize } from '../db'
+import { Equipment } from './equipment'
+import { User } from './user'
 
-export class EquipmentType extends Model {
-	declare id: number
+export class EquipmentType extends Model<
+	InferAttributes<EquipmentType>,
+	InferCreationAttributes<EquipmentType>
+> {
+	declare id: CreationOptional<number>
 	declare name: string
 	declare drivingLicenseCategory: string | null
 	declare comment: string | null
+	declare getEquipments: HasManyGetAssociationsMixin<Equipment>
+	declare createdAt: CreationOptional<Date>
+	declare updatedAt: CreationOptional<Date>
+	declare deletedAt: CreationOptional<Date>
+
 	static async createDefaults() {
 		const defaultEquipmentTypes = [
 			{
@@ -56,56 +74,6 @@ export class EquipmentType extends Model {
 			})
 		}
 	}
-	// constructor(id?: number, name?: string) {
-	// 	super()
-	// 	this.id = id || 0
-	// 	this.name = name || ''
-	// }
-	// static get tableName() {
-	// 	return 'equipmentTypes'
-	// }
-	// static get idColumn() {
-	// 	return 'id'
-	// }
-	// static async getTypeById(id: number) {
-	// 	try {
-	// 		const type = await this.query().findById(id)
-	// 		if (!type) {
-	// 			return new Error('Type not found')
-	// 		}
-	// 		return type
-	// 	} catch (error) {
-	// 		return Promise.reject(error)
-	// 	}
-	// }
-	// static async getTypeByName(name: string) {
-	// 	try {
-	// 		const type = await this.query().where({ name }).first()
-	// 		if (!type) {
-	// 			return new Error('Type not found')
-	// 		}
-	// 		return type
-	// 	} catch (error) {
-	// 		return Promise.reject(error)
-	// 	}
-	// }
-	// static async getAll() {
-	// 	try {
-	// 		const types = await this.query()
-	// 		return types
-	// 	} catch (error) {
-	// 		return Promise.reject(error)
-	// 	}
-	// }
-	// static get jsonSchema() {
-	// 	return {
-	// 		type: 'workPlace',
-	// 		properties: {
-	// 			id: { type: 'integer' },
-	// 			name: { type: 'string' },
-	// 		},
-	// 	}
-	// }
 }
 
 EquipmentType.init(
@@ -129,21 +97,21 @@ EquipmentType.init(
 			type: DataTypes.STRING(255),
 			allowNull: true,
 		},
-		// createdAt: {
-		// 	type: DataTypes.DATE,
-		// 	allowNull: false,
-		// },
-		// updatedAt: {
-		// 	type: DataTypes.DATE,
-		// 	allowNull: false,
-		// },
-		// deletedAt: {
-		// 	type: DataTypes.DATE,
-		// 	allowNull: true,
-		// },
+		createdAt: {
+			type: DataTypes.DATE,
+			allowNull: false,
+		},
+		updatedAt: {
+			type: DataTypes.DATE,
+			allowNull: false,
+		},
+		deletedAt: {
+			type: DataTypes.DATE,
+			allowNull: true,
+		},
 	},
 	{
-		modelName: 'equipmentType',
+		tableName: 'equipmentType',
 		sequelize,
 		paranoid: true,
 	}

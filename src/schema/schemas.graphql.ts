@@ -1,3 +1,4 @@
+import { EquipmentType } from './../models/equipmentType'
 const typeDefs = `#graphql
   type User {
     id: ID!
@@ -27,7 +28,7 @@ const typeDefs = `#graphql
   }
   type Equipment {
     id: ID!
-    type: String!
+    type: EquipmentType!
     name: String!
     dimensions: String
     weight: Int
@@ -37,6 +38,8 @@ const typeDefs = `#graphql
   type EquipmentType {
     id: ID!
     name: String!
+    drivingLicenseCategory: String
+    comment: String
   }
   type WorkPlace {
     id: ID!
