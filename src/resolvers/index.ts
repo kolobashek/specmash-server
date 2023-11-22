@@ -12,7 +12,7 @@ export const resolverPermissions = async (ctx: any, ...resolvedRoles: string[]) 
 	const token: string = ctx.request.headers.headersInit.authorization
 	// console.log(ctx.request.headers.headersInit)
 	if (!token) return false
-
+	// console.log(ctx.request.headers.headersInit)
 	const user = await User.checkAuthByToken(token, {
 		include: { model: Role, required: true, as: 'roles' },
 	})

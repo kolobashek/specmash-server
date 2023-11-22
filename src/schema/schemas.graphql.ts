@@ -1,4 +1,3 @@
-import { EquipmentType } from './../models/equipmentType'
 const typeDefs = `#graphql
   type User {
     id: ID!
@@ -66,7 +65,10 @@ const typeDefs = `#graphql
     shiftNumber: Int
     hours: Float
     breaks: Float
-    comments: String
+    comment: String
+    createdAt: String
+    updatedAt: String
+    deletedAt: String
   }
 `
 export default typeDefs

@@ -1,84 +1,34 @@
-import { DataTypes, Model } from 'sequelize'
+import {
+	Association,
+	BelongsToManyGetAssociationsMixin,
+	BelongsToManySetAssociationsMixin,
+	CreationOptional,
+	DataTypes,
+	InferAttributes,
+	InferCreationAttributes,
+	Model,
+} from 'sequelize'
 import { sequelize } from '../db'
 import { Partner } from './partner'
 
-export class WorkPlace extends Model {
-	declare id: number
+export class WorkPlace extends Model<
+	InferAttributes<WorkPlace>,
+	InferCreationAttributes<WorkPlace>
+> {
+	declare id: CreationOptional<number>
 	declare name: string
-	declare address: string | null
-	declare comment: string | null
-	declare contacts: string | null
-	// static get tableName() {
-	// 	return 'workPlaces'
-	// }
-	// static get relationMappings() {
-	// 	return {
-	// 		partners: {
-	// 			relation: Model.ManyToManyRelation,
-	// 			modelClass: Partner,
-	// 			join: {
-	// 				from: 'workPlaces.id',
-	// 				through: {
-	// 					from: 'partnersWorkPlaces.workPlaceId',
-	// 					to: 'partnersWorkPlaces.partnerId',
-	// 				},
-	// 				to: 'partners.id',
-	// 			},
-	// 		},
-	// 	}
-	// }
-	// static async getAll() {
-	// 	try {
-	// 		const workPlaces = await WorkPlace.query().withGraphFetched('partners')
-	// 		console.log('workPlaces.getAll')
-	// 		return workPlaces
-	// 	} catch (error) {
-	// 		return new Error(error as string)
-	// 	}
-	// }
-	// static async getWorkPlaceById(id: number) {
-	// 	try {
-	// 		const workPlace = await this.query().findById(id).withGraphFetched('partners')
-	// 		if (!workPlace) {
-	// 			return new Error('WorkPlace not found')
-	// 		}
-	// 		return workPlace
-	// 	} catch (error) {
-	// 		return Promise.reject(error)
-	// 	}
-	// }
-
-	// static async create(input: WorkPlaceAttributesInput) {
-	// 	const { partners, ...workPlaceData } = input
-	// 	try {
-	// 		const newWorkPlace = await WorkPlace.query().insertAndFetch(workPlaceData)
-	// 		if (partners) {
-	// 			await newWorkPlace.$relatedQuery('partners').relate(partners)
-	// 		}
-	// 		return newWorkPlace
-	// 	} catch (error) {
-	// 		return new Error(error as string)
-	// 	}
-	// }
-	// static async update(input: WorkPlaceAttributes) {
-	// 	try {
-	// 		const { partners, ...workPlaceData } = input
-	// 		const workPlace = await WorkPlace.query().findById(workPlaceData.id)
-	// 		if (!workPlace) {
-	// 			return new Error('WorkPlace not found')
-	// 		}
-	// 		const updatedWorkPlace = await workPlace.$query().patchAndFetch({
-	// 			...workPlaceData,
-	// 		})
-	// 		if (partners) {
-	// 			await workPlace.$relatedQuery('partners').relate(partners)
-	// 		}
-	// 		// const updatedWorkPlace = await WorkPlace.query().upsertGraph(graphData)
-	// 		return updatedWorkPlace
-	// 	} catch (error) {
-	// 		return new Error(error as string)
-	// 	}
-	// }
+	declare address: CreationOptional<string>
+	declare comment: CreationOptional<string>
+	declare contacts: CreationOptional<string>
+	declare getPartners: BelongsToManyGetAssociationsMixin<Partner>
+	declare setPartners: BelongsToManySetAssociationsMixin<Partner, number>
+	declare addPartner: BelongsToManySetAssociationsMixin<Partner, number>
+	declare createdAt: CreationOptional<Date>
+	declare updatedAt: CreationOptional<Date>
+	declare deletedAt: CreationOptional<Date>
+	declare static associations: {
+		type: Association<WorkPlace, Partner>
+	}
 }
 WorkPlace.init(
 	{
@@ -104,6 +54,18 @@ WorkPlace.init(
 			type: DataTypes.STRING,
 			allowNull: true,
 		},
+		createdAt: {
+			type: DataTypes.DATE,
+			allowNull: false,
+		},
+		updatedAt: {
+			type: DataTypes.DATE,
+			allowNull: false,
+		},
+		deletedAt: {
+			type: DataTypes.DATE,
+			allowNull: true,
+		},
 	},
 	{
 		modelName: 'workPlaces',
@@ -111,6 +73,20 @@ WorkPlace.init(
 		paranoid: true,
 	}
 )
+WorkPlace.beforeCreate(async (workPlace) => {
+	const workPlaceExists = await Partner.findOne({ where: { name: workPlace.name } })
+	if (workPlaceExists) {
+		throw new Error('Объект с таким названием уже зарегистрирован')
+	}
+})
+Partner.beforeCreate(async (partner) => {
+	const partnerExists = await Partner.findOne({ where: { name: partner.name } })
+	if (partnerExists) {
+		throw new Error('Контрагент с таким названием уже зарегистрирован')
+	}
+})
+Partner.belongsToMany(WorkPlace, { through: 'PartnerWorkPlace', as: 'workPlaces' })
+WorkPlace.belongsToMany(Partner, { through: 'PartnerWorkPlace', as: 'partners' })
 
 export interface WorkPlaceAttributes extends WorkPlaceAttributesInput {
 	id: number

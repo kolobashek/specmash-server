@@ -1,90 +1,32 @@
 import { WorkPlace } from './workPlace'
 import {
+	Association,
 	BelongsToManyGetAssociationsMixin,
 	BelongsToManySetAssociationsMixin,
+	CreationOptional,
 	DataTypes,
+	InferAttributes,
+	InferCreationAttributes,
 	Model,
 } from 'sequelize'
 import { sequelize } from '../db'
+import { TravelLog } from './travelLog'
 
-export class Partner extends Model {
-	declare id: number
+export class Partner extends Model<InferAttributes<Partner>, InferCreationAttributes<Partner>> {
+	declare id: CreationOptional<number>
 	declare name: string
-	declare address: string | null
-	declare comment: string | null
-	declare contacts: string | null
+	declare address: CreationOptional<string>
+	declare comment: CreationOptional<string>
+	declare contacts: CreationOptional<string>
 	declare getWorkPlaces: BelongsToManyGetAssociationsMixin<WorkPlace>
 	declare setWorkPlaces: BelongsToManySetAssociationsMixin<WorkPlace, number>
 	declare addWorkPlace: BelongsToManySetAssociationsMixin<WorkPlace, number>
-
-	// static get tableName() {
-	// 	return 'partners'
-	// }
-	// static get relationMappings() {
-	// 	return {
-	// 		workPlaces: {
-	// 			relation: Model.ManyToManyRelation,
-	// 			modelClass: WorkPlace,
-	// 			join: {
-	// 				from: 'partners.id',
-	// 				through: {
-	// 					from: 'partnersWorkPlaces.partnerId',
-	// 					to: 'partnersWorkPlaces.workPlaceId',
-	// 				},
-	// 				to: 'workPlaces.id',
-	// 			},
-	// 		},
-	// 	}
-	// }
-	// static async getAll() {
-	// 	try {
-	// 		const partners = await Partner.query().withGraphFetched('workPlaces')
-	// 		return partners
-	// 	} catch (error) {
-	// 		return new Error(error as string)
-	// 	}
-	// }
-	// static async getPartnerById(id: number) {
-	// 	try {
-	// 		const partner = await this.query().findById(id).withGraphFetched('workPlaces')
-	// 		if (!partner) {
-	// 			return new Error('Partner not found')
-	// 		}
-	// 		return partner
-	// 	} catch (error) {
-	// 		return Promise.reject(error)
-	// 	}
-	// }
-	// static async create(input: PartnerAttributesInput) {
-	// 	const { workPlace, ...partnerData } = input
-	// 	try {
-	// 		const newPartner = await Partner.query().insert(partnerData)
-	// 		if (workPlace) {
-	// 			await newPartner.$relatedQuery('workPlaces').relate(workPlace)
-	// 		}
-	// 		return newPartner
-	// 	} catch (error) {
-	// 		return new Error(error as string)
-	// 	}
-	// }
-	// static async update(input: PartnerAttributes) {
-	// 	const { workPlaces, ...partnerData } = input
-	// 	try {
-	// 		const partner = await Partner.query().findById(partnerData.id)
-	// 		if (!partner) {
-	// 			return new Error('Partner not found')
-	// 		}
-	// 		const updatedPartner = await Partner.query().patchAndFetch({
-	// 			...partnerData,
-	// 		})
-	// 		if (workPlaces) {
-	// 			await partner.$relatedQuery('workPlaces').relate(workPlaces)
-	// 		}
-	// 		return updatedPartner
-	// 	} catch (error) {
-	// 		return new Error(error as string)
-	// 	}
-	// }
+	declare createdAt: CreationOptional<Date>
+	declare updatedAt: CreationOptional<Date>
+	declare deletedAt: CreationOptional<Date>
+	declare static associations: {
+		type: Association<WorkPlace, Partner>
+	}
 }
 
 Partner.init(
@@ -106,14 +48,22 @@ Partner.init(
 			type: DataTypes.STRING,
 			allowNull: true,
 		},
-		// workPlaces: {
-		// 	type: DataTypes.INTEGER,
-		// 	allowNull: true,
-		// 	references: {
-		// 		model: WorkPlace,
-		// 		key: 'id',
-		// 	},
-		// },
+		comment: {
+			type: DataTypes.STRING,
+			allowNull: true,
+		},
+		createdAt: {
+			type: DataTypes.DATE,
+			allowNull: false,
+		},
+		updatedAt: {
+			type: DataTypes.DATE,
+			allowNull: false,
+		},
+		deletedAt: {
+			type: DataTypes.DATE,
+			allowNull: true,
+		},
 	},
 	{
 		modelName: 'partners',
@@ -121,14 +71,6 @@ Partner.init(
 		paranoid: true,
 	}
 )
-Partner.beforeCreate(async (partner) => {
-	const partnerExists = await Partner.findOne({ where: { name: partner.name } })
-	if (partnerExists) {
-		throw new Error('Контрагент с таким названием уже зарегистрирован')
-	}
-})
-Partner.belongsToMany(WorkPlace, { through: 'PartnerWorkPlace', as: 'workPlaces' })
-WorkPlace.belongsToMany(Partner, { through: 'PartnerWorkPlace', as: 'partners' })
 
 export interface PartnerAttributes extends PartnerAttributesInput {
 	id: number

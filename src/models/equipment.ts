@@ -11,6 +11,7 @@ import {
 } from 'sequelize'
 import { sequelize } from '../db'
 import { EquipmentType } from './equipmentType'
+import { TravelLog } from './travelLog'
 
 export class Equipment extends Model<
 	InferAttributes<Equipment>,
@@ -94,6 +95,7 @@ Equipment.init(
 	}
 )
 Equipment.belongsTo(EquipmentType, { foreignKey: 'typeId', as: 'type' })
+TravelLog.belongsTo(Equipment, { as: 'equipment', foreignKey: 'equipmentId' })
 
 // interface EquipmentAttributes extends EquipmentAttributesInput {
 // 	id: number

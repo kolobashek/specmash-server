@@ -15,6 +15,7 @@ import {
 	BelongsToManySetAssociationsMixin,
 } from 'sequelize'
 import { EquipmentType } from './equipmentType'
+import { TravelLog } from './travelLog'
 
 const signingKey = process.env.JWT_SECRET || 'secret'
 
@@ -193,6 +194,8 @@ EquipmentType.belongsToMany(User, {
 	through: 'UserEquipmentTypes',
 	as: 'users',
 })
+TravelLog.belongsTo(User, { as: 'driver', foreignKey: 'driverId' })
+User.hasMany(TravelLog)
 
 export interface IUser extends IUserInput {
 	id: number

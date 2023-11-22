@@ -1,6 +1,7 @@
 import { resolverPermissions } from '.'
 import { Partner, PartnerAttributes, PartnerAttributesInput } from '../models/partner'
 import { GraphQLError } from 'graphql'
+import { WorkPlace } from '../models/workPlace'
 
 /**
  * Partner resolver defines GraphQL queries and mutations for partners.
@@ -22,13 +23,15 @@ export const PartnerResolver = {
 	Query: {
 		partners: async () => {
 			// получить объекты из БД
-			const partners = await Partner.findAll()
+			const partners = await Partner.findAll({ include: [{ model: WorkPlace, as: 'workPlaces' }] })
 			return partners
 		},
 
 		partner: async (parent: any, { id }: { id: number }, ctx: any) => {
 			// получить объекты из БД
-			const partners = await Partner.findByPk(id)
+			const partners = await Partner.findByPk(id, {
+				include: [{ model: WorkPlace, as: 'workPlaces' }],
+			})
 			return partners
 		},
 	},
@@ -38,10 +41,13 @@ export const PartnerResolver = {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
 				// if (!input.workPlaces?.length)
-				// console.log('---===--->')
-				// console.log(input)
-				// console.log('<---===---')
-				const partner = await Partner.create({ ...input })
+				console.log('---===--->')
+				console.log(input)
+				console.log('<---===---')
+				const partner = await Partner.create(
+					{ ...input },
+					{ include: [{ model: WorkPlace, as: 'workPlaces' }] }
+				)
 				// console.log('---===--->')
 				// console.log(partner)
 				// console.log('<---===---')

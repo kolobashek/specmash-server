@@ -63,7 +63,7 @@ export class EquipmentType extends Model<
 				drivingLicenseCategory: 'B',
 			},
 			{
-				name: 'Микроавтобус',
+				name: 'Автобус',
 				drivingLicenseCategory: 'D',
 			},
 		]

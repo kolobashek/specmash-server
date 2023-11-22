@@ -313,7 +313,7 @@ TravelLog.init(
 			allowNull: true,
 		},
 		breaks: {
-			type: DataTypes.INTEGER,
+			type: DataTypes.FLOAT,
 			allowNull: true,
 		},
 		comment: {
@@ -327,6 +327,8 @@ TravelLog.init(
 		paranoid: true,
 	}
 )
+TravelLog.belongsTo(WorkPlace, { as: 'workPlace', foreignKey: 'workPlaceId' })
+TravelLog.belongsTo(Partner, { as: 'partner', foreignKey: 'partnerId' })
 interface UpdateTravelLogInput extends CreateTravelLogInput {
 	id: number
 }

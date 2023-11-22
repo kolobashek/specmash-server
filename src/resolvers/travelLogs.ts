@@ -4,9 +4,18 @@ import { TravelLog, CreateTravelLogPayload, UpdateTravelLogPayload } from '../mo
 
 export const TravelLogResolver = {
 	Query: {
-		travelLogs: async () => {
-			// получить путевые листы из БД
+		travelLogs: async (parent: any, args: any, ctx: any) => {
+			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
+			if (userHasPermissions) {
+				// получить путевые листы из БД
+				const travelLogs = await TravelLog.findAll({
+					include: ['driver', 'equipment', 'workPlace', 'partner'],
+				})
+				return travelLogs
+			}
+			return new GraphQLError('Недостаточные права доступа')
 		},
+		travelLog: async (parent: any, { id }: { id: number }, ctx: any) => {},
 	},
 	Mutation: {
 		createTravelLog: async (parent: any, { input }: CreateTravelLogPayload, ctx: any) => {
