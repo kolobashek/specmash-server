@@ -33,7 +33,7 @@ export const WorkPlaceResolver = {
 				if (input.partners?.length) {
 					workPlace.setPartners(input.partners)
 				}
-				console.log(workPlace)
+				// console.log(workPlace)
 				return workPlace
 			}
 			return new GraphQLError('Недостаточно прав')
@@ -48,7 +48,7 @@ export const WorkPlaceResolver = {
 						workPlace.setPartners(input.partners)
 					}
 				}
-				console.log(workPlace)
+				// console.log(workPlace)
 				return workPlace
 			}
 			return new GraphQLError('Недостаточно прав')

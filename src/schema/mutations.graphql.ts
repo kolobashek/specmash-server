@@ -1,9 +1,10 @@
 const typeDefs = `#graphql
   type Mutation {
     #Users
+    createUser(input: CreateUserInput!): User
     updateUser(input: UpdateUserInput!): User
     #Auth
-    register(input: CreateUserInput!): User
+    register(input: RegisterUserInput!): User
     login(phone: String!, password: String!): LoginPayload
     #Shifts
     createTravelLog(input: CreateTravelLogInput!): TravelLog

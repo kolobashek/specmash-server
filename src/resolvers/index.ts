@@ -17,7 +17,7 @@ export const resolverPermissions = async (ctx: any, ...resolvedRoles: string[]) 
 		include: { model: Role, required: true, as: 'roles' },
 	})
 
-	if (!user) return false
+	if (user instanceof Error) return false
 	// console.log('-=- not user -=-', user.toJSON())
 	return true
 }

@@ -1,25 +1,43 @@
 import { GraphQLError } from 'graphql'
 import { resolverPermissions } from '.'
-import { User, LoginInput, UserIdInput, IUser } from '../models/user'
+import { User, LoginInput, UserIdInput, IUser, IUserFilter } from '../models/user'
 import { Role } from '../models/role'
 import { Op } from 'sequelize'
+import { EquipmentType } from '../models/equipmentType'
 
 export const UserResolver = {
 	Query: {
-		users: async (parent: any, { input }: any, ctx: any) => {
+		users: async (parent: any, { input }: IUserFilter, ctx: any) => {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
 				// console.log('---===--->')
 				// console.log(input)
 				// console.log('<---===---')
+				const { limit, offset, search, roles, ...other } = input
 				const users = await User.findAll({
-					...input,
+					where: { ...other },
 					include: [
 						{
 							model: Role,
 							as: 'roles',
+							where: {
+								id: {
+									[Op.or]: roles,
+								},
+							},
+						},
+						{
+							model: EquipmentType,
+							as: 'equipmentTypes',
+							where: {
+								id: {
+									[Op.or]: input.equipmentTypes,
+								},
+							},
 						},
 					],
+					limit,
+					offset,
 				})
 				return users
 			}
@@ -53,6 +71,24 @@ export const UserResolver = {
 		},
 	},
 	Mutation: {
+		createUser: async (parent: any, { input }: { input: Omit<IUser, 'password'> }, ctx: any) => {
+			try {
+				const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
+				if (userHasPermissions) {
+					const password = User.generatePassword()
+					console.log(password)
+					const { roles, ...other } = input
+					const payload = { ...input, password }
+					const user = await User.create(payload, { include: [{ model: Role, as: 'roles' }] })
+					// user.setRoles(input.roles)
+					console.log(user.toJSON())
+					return user
+				}
+				return new GraphQLError('Недостаточные права доступа').toJSON()
+			} catch (error: any) {
+				return new GraphQLError(error.message)
+			}
+		},
 		updateUser: async (parent: any, { input }: { input: Partial<IUser> }, ctx: any) => {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {

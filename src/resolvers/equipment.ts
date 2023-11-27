@@ -31,7 +31,7 @@ export const EquipmentResolver = {
 		) => {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
-				console.log('input', input)
+				// console.log('input', input)
 				const newEquipment = await Equipment.create(input, {
 					include: [
 						{
@@ -51,7 +51,7 @@ export const EquipmentResolver = {
 				if (equipment) {
 					await equipment.update(input)
 				}
-				console.log(equipment)
+				// console.log(equipment)
 				return equipment
 			}
 			return new GraphQLError('Недостаточно прав')

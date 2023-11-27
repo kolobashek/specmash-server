@@ -8,11 +8,17 @@ const typeDefs = `#graphql
     id: Int
     name: String
   }
-  input CreateUserInput {
+  input RegisterUserInput {
     name: String!
     phone: String!
     password: String!
-    roles: [Int]
+    nickname: String
+    comment: String
+  }
+  input CreateUserInput {
+    name: String!
+    phone: String!
+    roles: [Int]!
     nickname: String
     comment: String
   }
@@ -23,7 +29,6 @@ const typeDefs = `#graphql
     password: String
     roles: [Int]
     nickname: String
-    isActive: Boolean
     comment: String
   }
 
@@ -101,9 +106,16 @@ const typeDefs = `#graphql
     nickname: String
   }
   input UsersFilterInput {
+    phone: String
     name: String
 	  roles: [Int]
-	  isActive: Boolean
+    limit: Int
+    offset: Int
+    deleted: Boolean
+    createdAt: String
+    sort: String
+    order: String
+    search: String
   }
 `
 export default typeDefs

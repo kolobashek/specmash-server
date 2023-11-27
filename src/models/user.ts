@@ -32,48 +32,94 @@ export class User extends Model<InferAttributes<User>, InferCreationAttributes<U
 	isActive() {
 		return !this.isSoftDeleted()
 	}
-
-	static async checkAuthByToken(token: string, opts?: any) {
-		const hash = token.split(' ')[1]
-		const payload = jwt.verify(hash, signingKey)
-		if (typeof payload === 'string') {
-			logger.error(payload)
-			return null
+	static generatePassword() {
+		/**
+		 * !> Генерирует случайный пароль
+		 * ? Длина пароля по умолчанию 6 символов
+		 * ? Набор символов:
+		 * - буквы латинского алфавита в верхнем и нижнем регистре
+		 * - цифры
+		 *
+		 * !> Алгоритм:
+		 * 1. Задаётся длина пароля length
+		 * 2. Задаётся набор символов charset
+		 * 3. Цикл от 0 до длины пароля
+		 * 4. На каждой итерации берётся случайный символ из набора
+		 * 5. Складывается в строку retVal
+		 * 6. Возвращается сгенерированный пароль
+		 */
+		let length = 6,
+			charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+			retVal = ''
+		for (var i = 0, n = charset.length; i < length; ++i) {
+			retVal += charset.charAt(Math.floor(Math.random() * n))
 		}
-		// console.log('checkAuthByToken ---', payload)
-		const user = await User.findByPk(payload.id, { include: { all: true }, ...opts })
-		// console.log('checkAuthByToken ---', user)
-		if (user === null) {
-			logger.error('Пользователь не найден')
-		}
-		return user
+		return retVal
 	}
-	/**
-	 * Входит в систему под пользователем, проверяя его номер телефона и пароль.
-	 *
-	 * Принимает объект LoginInput, содержащий телефон и пароль.
-	 * Находит пользователя по номеру телефона.
-	 * Сравнивает предоставленный пароль с хешированным паролем в базе данных.
-	 * Если данные верны, генерирует JWT-токен, содержащий идентификатор пользователя.
-	 * Возвращает объект, содержащий новый токен и объект пользователя.
-	 * Если вход не удался, возвращает ошибку.
-	 */
 
-	static async login(payload: LoginInput) {
+	/**
+	 * ! Проверяет аутентификацию пользователя по JWT токену
+	 * @param {string} token - JWT токен
+	 * @param {Object} opts - Дополнительные опции запроса
+	 * TODO: Добавить валидацию токена
+	 *
+	 * ! Выполняет следующие действия:
+	 * 1. Извлекает хеш из токена
+	 * 2. Верифицирует хеш с помощью ключа подписи
+	 * 3. Если payload является строкой, возвращает ошибку
+	 * 4. Ищет пользователя по идентификатору из payload
+	 * 5. Возвращает найденного пользователя или null
+	 */
+	static async checkAuthByToken(token: string, opts?: any) {
+		try {
+			const hash = token.split(' ')[1]
+			const payload = jwt.verify(hash, signingKey)
+			if (typeof payload === 'string') {
+				logger.error(payload)
+				return new Error(payload)
+			}
+			const user = await User.findByPk(payload.id, { include: { all: true }, ...opts })
+			if (user === null) {
+				logger.error('Пользователь не найден')
+				return new Error('Пользователь не найден')
+			}
+			return user
+		} catch (error) {
+			return new Error(error as string)
+		}
+	}
+
+	/**
+	 * Аутентифицирует пользователя и возвращает JWT токен
+	 *
+	 * @param {LoginInput} payload - Данные для входа: номер телефона и пароль
+	 *
+	 * @returns {Promise<{ token: string; user: User } | Error>} - Объект с JWT токеном и данными пользователя
+	 * или ошибку аутентификации
+	 */
+	static async login(payload: LoginInput): Promise<{ token: string; user: User } | Error> {
+		/** Ищет пользователя по номеру телефона из payload */
 		const user = await User.findOne({ where: { phone: payload.phone }, include: { all: true } })
 		if (!user) {
 			return new Error('Пользователь не найден')
 		}
+
+		/** Сравнивает хеши паролей */
 		const isValid = await compare(payload.password, user.password)
 		if (!isValid) {
 			return new Error('Неверный пароль')
 		}
+
+		/** Генерирует JWT токен */
 		const token = jwt.sign({ id: user.id }, signingKey, {
 			subject: payload.phone,
 			expiresIn: '1d',
 		})
+
+		/** Возвращает токен и данные пользователя */
 		return { token, user }
 	}
+
 	static async register(payload: RegisterUserInput) {
 		const user = await User.findOne({ where: { phone: payload.phone } })
 		if (user) {
@@ -108,16 +154,17 @@ export class User extends Model<InferAttributes<User>, InferCreationAttributes<U
 			},
 		]
 		for (const user of users) {
-			const roles = []
-			for (const role of user.roles) {
+			const { roles, ...userData } = user
+			const formattedRoles = []
+			for (const role of roles) {
 				const [currentRole] = await Role.findOrCreate({ where: { name: role.name } })
-				roles.push(currentRole)
+				formattedRoles.push(currentRole)
 			}
 			const [newUser] = await User.findOrCreate({
 				where: { phone: user.phone },
-				defaults: user,
+				defaults: userData,
 			})
-			newUser.setRoles(roles)
+			newUser.setRoles(formattedRoles)
 		}
 	}
 }
@@ -197,13 +244,16 @@ EquipmentType.belongsToMany(User, {
 TravelLog.belongsTo(User, { as: 'driver', foreignKey: 'driverId' })
 User.hasMany(TravelLog)
 
-export interface IUser extends IUserInput {
+export interface IUser extends Omit<IUserInput, 'roles' | 'equipmentTypes'> {
 	id: number
+	roles: Role[]
+	equipmentTypes: EquipmentType[]
 }
 export interface IUserInput extends LoginInput {
 	name: string
+	roles: number[]
+	equipmentTypes: number[]
 	nickname?: string
-	role: string
 	comment?: string
 }
 
@@ -223,9 +273,12 @@ export interface LoginInput {
 export interface IUserFilter {
 	input: IFilter
 }
-interface IFilter extends Partial<IUser> {
+interface IFilter extends Partial<Omit<IUser, 'roles' | 'equipmentTypes'>> {
 	limit?: number
 	offset?: number
+	search?: string
+	roles?: number[]
+	equipmentTypes?: number[]
 }
 
 // class User extends Model implements User {

@@ -6,11 +6,10 @@ const typeDefs = `#graphql
     password: String
     phone: String!
     roles: [Role]
-    isActive: Boolean!
     comment: String
-  }
-  type IsActivePayload {
-    isActive: Boolean!
+    createdAt: String!
+    updatedAt: String!
+    deletedAt: String
   }
   type LoginPayload {
     token: String!
@@ -63,7 +62,7 @@ const typeDefs = `#graphql
     equipment: Equipment
     date: String
     shiftNumber: Int
-    hours: Float
+    hoursWorked: Float
     breaks: Float
     comment: String
     createdAt: String

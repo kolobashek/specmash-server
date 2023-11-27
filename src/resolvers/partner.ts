@@ -41,9 +41,9 @@ export const PartnerResolver = {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
 				// if (!input.workPlaces?.length)
-				console.log('---===--->')
-				console.log(input)
-				console.log('<---===---')
+				// console.log('---===--->')
+				// console.log(input)
+				// console.log('<---===---')
 				const partner = await Partner.create(
 					{ ...input },
 					{ include: [{ model: WorkPlace, as: 'workPlaces' }] }
