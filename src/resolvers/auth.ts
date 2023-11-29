@@ -44,7 +44,7 @@ export const AuthResolver = {
 				return user // Return authenticated user
 			}
 
-			console.log('token/resolvers', token)
+			// console.log('token/resolvers', token)
 			/**
 			 * Return GraphQLError if user is not authenticated
 			 * @returns {GraphQLError} error

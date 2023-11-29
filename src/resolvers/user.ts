@@ -6,44 +6,91 @@ import { Op } from 'sequelize'
 import { EquipmentType } from '../models/equipmentType'
 
 export const UserResolver = {
+	/**
+	 * Query resolver for User model
+	 */
 	Query: {
+		/**
+		 * Get paginated list of users with filtering, sorting and relations
+		 *
+		 * @param {Object} parent - Parent object
+		 * @param {Object} input - Filtering, sorting and pagination input
+		 * @param {Object} ctx - GraphQL context
+		 * @returns {Promise<Object>} Promise resolving to paginated user list
+		 */
 		users: async (parent: any, { input }: IUserFilter, ctx: any) => {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
 				// console.log('---===--->')
 				// console.log(input)
 				// console.log('<---===---')
-				const { limit, offset, search, roles, ...other } = input
-				const users = await User.findAll({
-					where: { ...other },
+				const { limit = 100, offset, search, roles, equipmentTypes, ...other } = input
+				const users = await User.findAndCountAll({
+					distinct: true,
+					where: {
+						...other,
+						[Op.or]: [
+							{
+								name: {
+									[Op.substring]: search ? `%${search}%` : '%%',
+								},
+							},
+							{
+								phone: {
+									[Op.substring]: search ? `%${search}%` : '%%',
+								},
+							},
+							{
+								comment: {
+									[Op.substring]: search ? `%${search}%` : '%%',
+								},
+							},
+							{
+								nickname: {
+									[Op.substring]: search ? `%${search}%` : '%%',
+								},
+							},
+						],
+					},
 					include: [
 						{
 							model: Role,
 							as: 'roles',
 							where: {
 								id: {
-									[Op.or]: roles,
+									[Op.or]: roles && roles,
 								},
 							},
+							required: !!roles,
 						},
 						{
 							model: EquipmentType,
 							as: 'equipmentTypes',
 							where: {
 								id: {
-									[Op.or]: input.equipmentTypes,
+									[Op.or]: equipmentTypes && equipmentTypes,
 								},
 							},
+							required: !!equipmentTypes,
 						},
 					],
 					limit,
 					offset,
 				})
+				// console.log(users)
 				return users
 			}
 			return new GraphQLError('Не достаточно прав доступа')
 		},
 
+		/**
+		 * Get user by ID with role relations
+		 *
+		 * @param {Object} parent - Parent object
+		 * @param {number} id - User ID
+		 * @param {Object} ctx - GraphQL context
+		 * @returns {Promise<Object>} Promise resolving to User instance
+		 */
 		user: async (parent: any, { id }: { id: number }, ctx: any) => {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
@@ -60,16 +107,30 @@ export const UserResolver = {
 			return new GraphQLError('Не достаточно прав доступа')
 		},
 
+		/**
+		 * Get all roles
+		 *
+		 * @returns {Promise<Object[]>} Promise resolving to list of all roles
+		 */
 		roles: async () => {
 			// получить роли из БД
 			const roles = await Role.findAll()
 			return roles
 		},
+
+		/**
+		 * Find user by phone number
+		 *
+		 * @param {Object} _ - Parent object
+		 * @param {string} phone - User phone number
+		 * @returns {Promise<Object>} Promise resolving to user
+		 */
 		findByPhone: async (_: any, { phone }: { phone: string }) => {
 			const user = await User.findOne({ where: { phone } })
 			return user
 		},
 	},
+
 	Mutation: {
 		createUser: async (parent: any, { input }: { input: Omit<IUser, 'password'> }, ctx: any) => {
 			try {

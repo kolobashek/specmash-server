@@ -109,6 +109,7 @@ const typeDefs = `#graphql
     phone: String
     name: String
 	  roles: [Int]
+    equipmentType: [Int]
     limit: Int
     offset: Int
     deleted: Boolean

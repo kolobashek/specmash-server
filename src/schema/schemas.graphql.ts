@@ -11,6 +11,10 @@ const typeDefs = `#graphql
     updatedAt: String!
     deletedAt: String
   }
+  type AllUsers {
+    rows: [User]!
+    count: Int!
+  }
   type LoginPayload {
     token: String!
     user: User!

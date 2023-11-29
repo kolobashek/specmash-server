@@ -189,7 +189,7 @@ User.init(
 		phone: {
 			type: DataTypes.STRING(25),
 			allowNull: false,
-			unique: true,
+			unique: 'phone',
 			set(value: string) {
 				let phone = value
 				// Удаляем все не числовые символы

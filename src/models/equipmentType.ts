@@ -87,7 +87,7 @@ EquipmentType.init(
 		name: {
 			type: DataTypes.STRING(255),
 			allowNull: false,
-			unique: true,
+			unique: 'name',
 		},
 		drivingLicenseCategory: {
 			type: DataTypes.STRING(10),

@@ -1,6 +1,9 @@
+import jwt from 'jsonwebtoken'
 import { createServer } from 'node:http' // Создает HTTP сервер
 import { createYoga, maskError } from 'graphql-yoga' // Импорт функций из библиотеки graphql-yoga
 import schema from './schema' // Импорт схемы GraphQL
+import { User } from './models/user'
+const signingKey = process.env.JWT_SECRET || 'secret'
 
 const yoga = createYoga({
 	// Создает инстанс GraphQL сервера
@@ -23,11 +26,31 @@ const server = createServer(yoga) // Создает HTTP сервер на ба�
 
 export const startServer = (port: number) => {
 	// Функция запуска сервера
-	server.prependListener('request', (req, res) => {
+	server.prependListener('request', async (req, res) => {
 		// Добавляет обработчик запросов
 		// req - объект запроса
 		// res - объект ответа
-		console.log(req.headers.authorization)
+
+		const token = req.headers.authorization
+
+		if (token) {
+			try {
+				const user = await User.checkAuthByToken(token) // проверка токена
+				if (user instanceof Error) {
+					console.error(user)
+					return
+				}
+				if (user) {
+					const newToken = jwt.sign({ id: user.id }, signingKey, {
+						subject: user.phone,
+						expiresIn: '1d',
+					}) // обновление токена
+					res.setHeader('Authorization', `Bearer ${newToken}`) // установка обновленного токена в ответ
+				}
+			} catch (error) {
+				console.error(error)
+			}
+		}
 	})
 
 	server.listen(port, () => {

@@ -1,6 +1,6 @@
 const typeDefs = `#graphql
   type Query {
-    users(input: UsersFilterInput): [User]!
+    users(input: UsersFilterInput): AllUsers!
     me: User
     user(id:ID!): User
     isActive(userId: ID!): Boolean

@@ -59,7 +59,7 @@ Role.init(
 		},
 		name: {
 			type: DataTypes.STRING(255),
-			unique: true,
+			unique: 'name',
 			allowNull: false,
 		},
 		comment: {

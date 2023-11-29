@@ -40,7 +40,7 @@ WorkPlace.init(
 		name: {
 			type: DataTypes.STRING,
 			allowNull: false,
-			unique: true,
+			unique: 'name',
 		},
 		address: {
 			type: DataTypes.STRING,
