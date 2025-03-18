@@ -21,9 +21,6 @@ export const UserResolver = {
 		users: async (parent: any, { input }: IUserFilter, ctx: any) => {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
-				// console.log('---===--->')
-				// console.log(input)
-				// console.log('<---===---')
 				const { limit = 100, offset, search, roles, equipmentTypes, ...other } = input
 				const users = await User.findAndCountAll({
 					distinct: true,
@@ -56,28 +53,31 @@ export const UserResolver = {
 						{
 							model: Role,
 							as: 'roles',
-							where: {
-								id: {
-									[Op.or]: roles && roles,
-								},
-							},
+							where: roles
+								? {
+										id: {
+											[Op.or]: roles,
+										},
+								  }
+								: undefined,
 							required: !!roles,
 						},
 						{
 							model: EquipmentType,
 							as: 'equipmentTypes',
-							where: {
-								id: {
-									[Op.or]: equipmentTypes && equipmentTypes,
-								},
-							},
+							where: equipmentTypes
+								? {
+										id: {
+											[Op.or]: equipmentTypes,
+										},
+								  }
+								: undefined,
 							required: !!equipmentTypes,
 						},
 					],
 					limit,
 					offset,
 				})
-				// console.log(users)
 				return users
 			}
 			return new GraphQLError('Не достаточно прав доступа')
@@ -137,12 +137,9 @@ export const UserResolver = {
 				const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 				if (userHasPermissions) {
 					const password = User.generatePassword()
-					console.log(password)
 					const { roles, ...other } = input
 					const payload = { ...input, password }
 					const user = await User.create(payload, { include: [{ model: Role, as: 'roles' }] })
-					// user.setRoles(input.roles)
-					console.log(user.toJSON())
 					return user
 				}
 				return new GraphQLError('Недостаточные права доступа').toJSON()
@@ -153,25 +150,14 @@ export const UserResolver = {
 		updateUser: async (parent: any, { input }: { input: Partial<IUser> }, ctx: any) => {
 			const userHasPermissions = await resolverPermissions(ctx, 'admin', 'manager')
 			if (userHasPermissions) {
-				if (input.id) {
-					const user = await User.findByPk(input.id)
-					if (!user) {
-						return new GraphQLError('Пользователь с данным ID не найден')
-					}
-					const newUser = await user.update(input)
-					console.log(newUser.toJSON())
-					return newUser
-				} else if (input.phone) {
-					const user = await User.findOne({ where: { phone: input.phone } })
-					if (!user) {
-						return new GraphQLError('Пользователь с данным номером телефона не найден')
-					}
-					const newUser = await user.update(input)
-					console.log(newUser.toJSON())
-					return newUser
-				} else {
-					return new GraphQLError('Не указан id или телефон')
+				const user = input.id
+					? await User.findByPk(input.id)
+					: await User.findOne({ where: { phone: input.phone } })
+				if (!user) {
+					return new GraphQLError('Пользователь не найден')
 				}
+				const newUser = await user.update(input)
+				return newUser
 			}
 			return new GraphQLError('Недостаточно прав')
 		},
