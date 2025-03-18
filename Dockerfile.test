@@ -1,0 +1,14 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package.json yarn.lock ./
+COPY packages/specmash-server/package.json ./packages/specmash-server/
+
+RUN yarn install --frozen-lockfile
+
+COPY packages/specmash-server/ ./packages/specmash-server/
+
+WORKDIR /app/packages/specmash-server
+
+CMD ["yarn", "test"]

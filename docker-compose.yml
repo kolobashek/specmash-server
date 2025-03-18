@@ -17,6 +17,9 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
 
   phpmyadmin:
     image: phpmyadmin
@@ -29,11 +32,35 @@ services:
     environment:
       PMA_HOST: mariadb
       PMA_PORT: 3306
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
 
   specmash-server:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NPM_REGISTRY: https://registry.npmjs.org
+        NETWORK_TIMEOUT: 1000000
+    volumes:
+      - ./diagnostics:/app/diagnostics
     container_name: specmash-server
+    environment:
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_USER: kolobashek
+      DB_PASSWORD: Password123!
+      DB_NAME: specmash
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    extra_hosts:
+      - 'registry.npmjs.org:104.16.24.35'
     ports:
       - '3000:3000'
-    volumes:
-      - ./logs:/app/logs # Монтируем локальную папку logs
+    depends_on:
+      mariadb:
+        condition: service_healthy
+volumes:
+  mariadb_data:
